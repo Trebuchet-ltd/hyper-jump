@@ -6,10 +6,8 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -17,7 +15,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
 import { Material } from "../core/material.js";
 import { Node } from "../core/node.js";
 import { UrlTexture } from "../core/texture.js";
@@ -27,9 +24,7 @@ import { mat4 } from "../math/gl-matrix.js";
 class CubeSeaMaterial extends Material {
   constructor(heavy = false) {
     super();
-
     this.heavy = heavy;
-
     this.baseColor = this.defineSampler("baseColor");
   }
 
@@ -147,62 +142,46 @@ class CubeSeaMaterial extends Material {
       }`;
     }
   }
+
 }
 
 export class CubeSeaNode extends Node {
   constructor(options = {}) {
-    super();
-
-    // Test variables
+    super(); // Test variables
     // If true, use a very heavyweight shader to stress the GPU.
-    this.heavyGpu = !!options.heavyGpu;
 
-    // Number and size of the static cubes. Warning, large values
+    this.heavyGpu = !!options.heavyGpu; // Number and size of the static cubes. Warning, large values
     // don't render right due to overflow of the int16 indices.
+
     this.cubeCount = options.cubeCount || (this.heavyGpu ? 12 : 10);
-    this.cubeScale = options.cubeScale || 1.0;
-
-    // Draw only half the world cubes. Helps test variable render cost
+    this.cubeScale = options.cubeScale || 1.0; // Draw only half the world cubes. Helps test variable render cost
     // when combined with heavyGpu.
-    this.halfOnly = !!options.halfOnly;
 
-    // Automatically spin the world cubes. Intended for automated testing,
+    this.halfOnly = !!options.halfOnly; // Automatically spin the world cubes. Intended for automated testing,
     // not recommended for viewing in a headset.
+
     this.autoRotate = !!options.autoRotate;
-
-    this._texture = new UrlTexture(
-      options.imageUrl || "media/textures/cube-sea.png"
-    );
-
+    this._texture = new UrlTexture(options.imageUrl || "media/textures/cube-sea.png");
     this._material = new CubeSeaMaterial(this.heavyGpu);
     this._material.baseColor.texture = this._texture;
-
     this._renderPrimitive = null;
   }
 
   onRendererChanged(renderer) {
     this._renderPrimitive = null;
+    let boxBuilder = new BoxBuilder(); // Build the spinning "hero" cubes
 
-    let boxBuilder = new BoxBuilder();
-
-    // Build the spinning "hero" cubes
     boxBuilder.pushCube([0, 0.25, -0.8], 0.1);
     boxBuilder.pushCube([0.8, 0.25, 0], 0.1);
     boxBuilder.pushCube([0, 0.25, 0.8], 0.1);
     boxBuilder.pushCube([-0.8, 0.25, 0], 0.1);
-
     let heroPrimitive = boxBuilder.finishPrimitive(renderer);
-
     this.heroNode = renderer.createMesh(heroPrimitive, this._material);
-
     this.rebuildCubes(boxBuilder);
-
     this.cubeSeaNode = new Node();
     this.cubeSeaNode.addRenderPrimitive(this._renderPrimitive);
-
     this.addNode(this.cubeSeaNode);
     this.addNode(this.heroNode);
-
     return this.waitForComplete();
   }
 
@@ -217,21 +196,21 @@ export class CubeSeaNode extends Node {
       boxBuilder.clear();
     }
 
-    let size = 0.4 * this.cubeScale;
+    let size = 0.4 * this.cubeScale; // Build the cube sea
 
-    // Build the cube sea
     let halfGrid = this.cubeCount * 0.5;
+
     for (let x = 0; x < this.cubeCount; ++x) {
       for (let y = 0; y < this.cubeCount; ++y) {
         for (let z = 0; z < this.cubeCount; ++z) {
-          let pos = [x - halfGrid, y - halfGrid, z - halfGrid];
-          // Only draw cubes on one side. Useful for testing variable render
+          let pos = [x - halfGrid, y - halfGrid, z - halfGrid]; // Only draw cubes on one side. Useful for testing variable render
           // cost that depends on view direction.
+
           if (this.halfOnly && pos[0] < 0) {
             continue;
-          }
+          } // Don't place a cube in the center of the grid.
 
-          // Don't place a cube in the center of the grid.
+
           if (pos[0] == 0 && pos[1] == 0 && pos[2] == 0) {
             continue;
           }
@@ -247,13 +226,11 @@ export class CubeSeaNode extends Node {
       // the short index range past 12 cubes.
       boxBuilder.indexType = 5125; // gl.UNSIGNED_INT
     }
+
     let cubeSeaPrimitive = boxBuilder.finishPrimitive(this._renderer);
 
     if (!this._renderPrimitive) {
-      this._renderPrimitive = this._renderer.createRenderPrimitive(
-        cubeSeaPrimitive,
-        this._material
-      );
+      this._renderPrimitive = this._renderer.createRenderPrimitive(cubeSeaPrimitive, this._material);
     } else {
       this._renderPrimitive.setPrimitive(cubeSeaPrimitive);
     }
@@ -263,6 +240,8 @@ export class CubeSeaNode extends Node {
     if (this.autoRotate) {
       mat4.fromRotation(this.cubeSeaNode.matrix, timestamp / 500, [0, -1, 0]);
     }
+
     mat4.fromRotation(this.heroNode.matrix, timestamp / 2000, [0, 1, 0]);
   }
+
 }

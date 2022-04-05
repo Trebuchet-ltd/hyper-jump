@@ -6,10 +6,8 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -17,10 +15,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
 import { Material } from "../core/material.js";
 import { ATTRIB_MASK } from "../core/renderer.js";
-
 const VERTEX_SOURCE = `
 attribute vec3 POSITION, NORMAL;
 attribute vec2 TEXCOORD_0, TEXCOORD_1;
@@ -66,11 +62,10 @@ vec4 vertex_main(mat4 proj, mat4 view, mat4 model) {
   vLight2 = -LIGHT_DIRECTION2;
   vView = CAMERA_POSITION - mPos.xyz;
   return proj * view * mPos;
-}`;
-
-// These equations are borrowed with love from this docs from Epic because I
+}`; // These equations are borrowed with love from this docs from Epic because I
 // just don't have anything novel to bring to the PBR scene.
 // http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf
+
 const EPIC_PBR_FUNCTIONS = `
 vec3 lambertDiffuse(vec3 cDiff) {
   return cDiff / M_PI;
@@ -94,7 +89,6 @@ vec3 specF(float vDotH, vec3 F0) {
   float base = 2.0;
   return F0 + (1.0 - F0) * pow(base, exponent);
 }`;
-
 const FRAGMENT_SOURCE = `
 #define M_PI 3.14159265
 
@@ -230,27 +224,16 @@ vec4 fragment_main() {
 
   return vec4(.5 * (color1 + color2), baseColor.a);
 }`;
-
 export class PbrMaterial extends Material {
   constructor() {
     super();
-
     this.baseColor = this.defineSampler("baseColorTex");
     this.metallicRoughness = this.defineSampler("metallicRoughnessTex");
     this.normal = this.defineSampler("normalTex");
     this.occlusion = this.defineSampler("occlusionTex");
     this.emissive = this.defineSampler("emissiveTex");
-
-    this.baseColorFactor = this.defineUniform("baseColorFactor", [
-      1.0,
-      1.0,
-      1.0,
-      1.0,
-    ]);
-    this.metallicRoughnessFactor = this.defineUniform(
-      "metallicRoughnessFactor",
-      [1.0, 1.0]
-    );
+    this.baseColorFactor = this.defineUniform("baseColorFactor", [1.0, 1.0, 1.0, 1.0]);
+    this.metallicRoughnessFactor = this.defineUniform("metallicRoughnessFactor", [1.0, 1.0]);
     this.occlusionStrength = this.defineUniform("occlusionStrength", 1.0);
     this.emissiveFactor = this.defineUniform("emissiveFactor", [0, 0, 0]);
   }
@@ -279,10 +262,7 @@ export class PbrMaterial extends Material {
         programDefines["USE_BASE_COLOR_MAP"] = 1;
       }
 
-      if (
-        this.normal.texture &&
-        renderPrimitive._attributeMask & ATTRIB_MASK.TANGENT
-      ) {
+      if (this.normal.texture && renderPrimitive._attributeMask & ATTRIB_MASK.TANGENT) {
         programDefines["USE_NORMAL_MAP"] = 1;
       }
 
@@ -299,14 +279,11 @@ export class PbrMaterial extends Material {
       }
     }
 
-    if (
-      (!this.metallicRoughness.texture ||
-        !(renderPrimitive._attributeMask & ATTRIB_MASK.TEXCOORD_0)) &&
-      this.metallicRoughnessFactor.value[1] == 1.0
-    ) {
+    if ((!this.metallicRoughness.texture || !(renderPrimitive._attributeMask & ATTRIB_MASK.TEXCOORD_0)) && this.metallicRoughnessFactor.value[1] == 1.0) {
       programDefines["FULLY_ROUGH"] = 1;
     }
 
     return programDefines;
   }
+
 }

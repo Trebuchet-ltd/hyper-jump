@@ -1,23 +1,22 @@
 import { initAvatar } from "../primitive/avatar.js";
 import { mat4, vec3, quat } from "../render/math/gl-matrix.js";
-import { metaroomWebrtcSender } from "../corelink_handler.js"
-import { corelink_message } from "../util/corelink_sender.js"
+import { metaroomWebrtcSender } from "../corelink_handler.js";
+import { corelink_message } from "../util/corelink_sender.js"; // vars
 
-// vars
-window.localUuid = "";
-// window.localStream;
+window.localUuid = ""; // window.localStream;
+
 window.peerConnections = {}; // key is uuid, values are peer connection object and user defined display name string
+
 window.remoteIDs = [];
-window.webrtcInit = false;
-// const AudioContext = window.AudioContext || window.webkitAudioContext;
+window.webrtcInit = false; // const AudioContext = window.AudioContext || window.webkitAudioContext;
+
 window.speakStates = {};
-
-
 var peerConnectionConfig = {
-  iceServers: [
-    { urls: "stun:stun.stunprotocol.org:3478" },
-    { urls: "stun:stun.l.google.com:19302" },
-  ],
+  iceServers: [{
+    urls: "stun:stun.stunprotocol.org:3478"
+  }, {
+    urls: "stun:stun.l.google.com:19302"
+  }]
 };
 
 function setUserMediaVariable() {
@@ -27,28 +26,20 @@ function setUserMediaVariable() {
 
   navigator.mediaDevices.enumerateDevices().then(function (devices) {
     devices.forEach(function (device) {
-      console.log(
-        device.kind + ": " + device.label + " id = " + device.deviceId
-      );
+      console.log(device.kind + ": " + device.label + " id = " + device.deviceId);
     });
   });
 
   if (navigator.mediaDevices.getUserMedia === undefined) {
     navigator.mediaDevices.getUserMedia = function (constraints) {
       // gets the alternative old getUserMedia is possible
-      var getUserMedia =
-        navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+      var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia; // set an error message if browser doesn't support getUserMedia
 
-      // set an error message if browser doesn't support getUserMedia
       if (!getUserMedia) {
-        return Promise.reject(
-          new Error(
-            "Unfortunately, your browser does not support access to the webcam through the getUserMedia API. Try to use the latest version of Google Chrome, Mozilla Firefox, Opera, or Microsoft Edge instead."
-          )
-        );
-      }
+        return Promise.reject(new Error("Unfortunately, your browser does not support access to the webcam through the getUserMedia API. Try to use the latest version of Google Chrome, Mozilla Firefox, Opera, or Microsoft Edge instead."));
+      } // uses navigator.getUserMedia for older browsers
 
-      // uses navigator.getUserMedia for older browsers
+
       return new Promise(function (resolve, reject) {
         getUserMedia.call(navigator, constraints, resolve, reject);
       });
@@ -57,61 +48,48 @@ function setUserMediaVariable() {
 }
 
 window.webrtc_start = function () {
-  
   if (window.webrtcInit) {
     return;
   }
 
   console.log("webrtc initialized");
-
   window.webrtcInit = true;
-  window.localUuid = window.avatars[window.playerid].localUuid;
-  // specify audio for user media
+  window.localUuid = window.avatars[window.playerid].localUuid; // specify audio for user media
   // window.maxVideoWidth = 320;
-  var constraints = {
-    audio: true,
-  };
 
-  // setUserMediaVariable();
+  var constraints = {
+    audio: true
+  }; // setUserMediaVariable();
 
   if (navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices
-      .getUserMedia(constraints)
-      .then((stream) => {
-        // window.videoStream = stream;
-        window.localStream = stream;
-        // stream.getAudioTracks()[0].enabled = false;
-        document.getElementById("local_webrtc").muted = true;
-        document.getElementById("local_webrtc").srcObject = stream;
-        window.avatars[window.playerid].audio = document.getElementById(
-          "local_webrtc"
-        );
-        // update to global
-        // window.localStreamReady = true;
-        // hide the self video until calibration is finished
-        // document.getElementById('localVideoContainer').style.display = 'none';
-      })
-      .catch(errorHandler)
+    navigator.mediaDevices.getUserMedia(constraints).then(stream => {
+      // window.videoStream = stream;
+      window.localStream = stream; // stream.getAudioTracks()[0].enabled = false;
 
-      // set up websocket and message all existing clients
-      .then(() => {
-        // window.serverConnection.onmessage = gotMessageFromServer;
-        // window.serverConnection.onopen = event => {
-        //     window.serverConnection.send(JSON.stringify({ 'displayName': window.localDisplayName, 'uuid': window.localUuid, 'dest': 'all' }));
-        // }
-        // window.wsclient.send("webrtc", {
-        //   displayName: window.playerid,
-        //   uuid: window.localUuid,
-        //   dest: "all",
-        // });
-        var msg = corelink_message("webrtc", {
-          displayName: window.playerid,
-          uuid: window.localUuid,
-          dest: "all",
-        });
-        corelink.send(metaroomWebrtcSender, msg);
-      })
-      .catch(errorHandler);
+      document.getElementById("local_webrtc").muted = true;
+      document.getElementById("local_webrtc").srcObject = stream;
+      window.avatars[window.playerid].audio = document.getElementById("local_webrtc"); // update to global
+      // window.localStreamReady = true;
+      // hide the self video until calibration is finished
+      // document.getElementById('localVideoContainer').style.display = 'none';
+    }).catch(errorHandler) // set up websocket and message all existing clients
+    .then(() => {
+      // window.serverConnection.onmessage = gotMessageFromServer;
+      // window.serverConnection.onopen = event => {
+      //     window.serverConnection.send(JSON.stringify({ 'displayName': window.localDisplayName, 'uuid': window.localUuid, 'dest': 'all' }));
+      // }
+      // window.wsclient.send("webrtc", {
+      //   displayName: window.playerid,
+      //   uuid: window.localUuid,
+      //   dest: "all",
+      // });
+      var msg = corelink_message("webrtc", {
+        displayName: window.playerid,
+        uuid: window.localUuid,
+        dest: "all"
+      });
+      corelink.send(metaroomWebrtcSender, msg);
+    }).catch(errorHandler);
   } else {
     alert("Your browser does not support getUserMedia API");
   }
@@ -120,27 +98,27 @@ window.webrtc_start = function () {
 function setUpPeer(peerUuid, displayName, initCall = false) {
   window.peerConnections[peerUuid] = {
     displayName: displayName,
-    pc: new RTCPeerConnection(peerConnectionConfig),
+    pc: new RTCPeerConnection(peerConnectionConfig)
   };
-  window.peerConnections[peerUuid].pc.onicecandidate = (event) =>
-    gotIceCandidate(event, peerUuid);
-  window.peerConnections[peerUuid].pc.ontrack = (event) =>
-    gotRemoteStream(event, peerUuid);
-  window.peerConnections[peerUuid].pc.oniceconnectionstatechange = (event) =>
-    checkPeerDisconnect(event, peerUuid);
-  if (window.localStream)
-    window.peerConnections[peerUuid].pc.addStream(window.localStream);
+
+  window.peerConnections[peerUuid].pc.onicecandidate = event => gotIceCandidate(event, peerUuid);
+
+  window.peerConnections[peerUuid].pc.ontrack = event => gotRemoteStream(event, peerUuid);
+
+  window.peerConnections[peerUuid].pc.oniceconnectionstatechange = event => checkPeerDisconnect(event, peerUuid);
+
+  if (window.localStream) window.peerConnections[peerUuid].pc.addStream(window.localStream);
 
   if (initCall) {
-    window.peerConnections[peerUuid].pc
-      .createOffer()
-      .then((description) => createdDescription(description, peerUuid))
-      .catch(errorHandler);
+    window.peerConnections[peerUuid].pc.createOffer().then(description => createdDescription(description, peerUuid)).catch(errorHandler);
   }
 }
+
 window.setUpPeer = setUpPeer;
 
-window.mute = function (peerUuid = window.localUuid, speak = true /*0 speaking 1 muting */) {
+window.mute = function (peerUuid = window.localUuid, speak = true
+/*0 speaking 1 muting */
+) {
   // or unmute
   // console.log("window.peerConnections size", Object.keys(window.peerConnections).length);
   // if (Object.keys(window.peerConnections).length == 0) {
@@ -151,34 +129,29 @@ window.mute = function (peerUuid = window.localUuid, speak = true /*0 speaking 1
   // }
   if (peerUuid == window.localUuid) {
     console.log("DONT mute self", window.localUuid);
+
     for (let id in window.avatars) {
       console.log(window.avatars[id].localUuid);
     }
   } else if (peerUuid in window.peerConnections) {
     var hasAudio = false;
-    console.log(
-      peerUuid,
-      window.peerConnections,
-      window.peerConnections[peerUuid], "speaking or not", speak
-    );
-    // udpated
+    console.log(peerUuid, window.peerConnections, window.peerConnections[peerUuid], "speaking or not", speak); // udpated
+
     if (window.peerConnections[peerUuid].audioInputStream) {
-      window.peerConnections[peerUuid].audioInputStream.mediaStream
-        .getAudioTracks()
-        .forEach((t) => {
-          if (t.kind === "audio") {
-            t.enabled = speak;//!t.enabled;
-            hasAudio = t.enabled;
-            return hasAudio;
-          }
-        });
+      window.peerConnections[peerUuid].audioInputStream.mediaStream.getAudioTracks().forEach(t => {
+        if (t.kind === "audio") {
+          t.enabled = speak; //!t.enabled;
+
+          hasAudio = t.enabled;
+          return hasAudio;
+        }
+      });
     } else {
       console.log("[webrtc] warning no mediaStream in", window.peerConnections[peerUuid].audioInputStream);
     }
 
     return hasAudio;
-  }
-  else {
+  } else {
     // peerUuid is not in windowlpeerConnections yet, let's record it for now
     window.speakStates[peerUuid] = speak;
   }
@@ -194,7 +167,7 @@ function gotIceCandidate(event, peerUuid) {
     var msg = corelink_message("webrtc", {
       ice: event.candidate,
       uuid: window.localUuid,
-      dest: peerUuid,
+      dest: peerUuid
     });
     corelink.send(metaroomWebrtcSender, msg);
     console.log("corelink.send", msg);
@@ -203,29 +176,28 @@ function gotIceCandidate(event, peerUuid) {
 
 function createdDescription(description, peerUuid) {
   console.log(`got description, peer ${peerUuid}`);
+
   if ("localdesc" in window.peerConnections[peerUuid]) {
     console.log("already set local description");
   } else {
     window.peerConnections[peerUuid].localdesc = true;
-    window.peerConnections[peerUuid].pc
-      .setLocalDescription(description)
-      .then(function () {
-        // window.wsclient.send("webrtc", {
-        //   sdp: window.peerConnections[peerUuid].pc.localDescription,
-        //   uuid: window.localUuid,
-        //   dest: peerUuid,
-        // });
-        var msg = corelink_message("webrtc", {
-          sdp: window.peerConnections[peerUuid].pc.localDescription,
-          uuid: window.localUuid,
-          dest: peerUuid,
-        });
-        corelink.send(metaroomWebrtcSender, msg);
-        console.log("corelink.send", msg);
-      })
-      .catch(errorHandler);
+    window.peerConnections[peerUuid].pc.setLocalDescription(description).then(function () {
+      // window.wsclient.send("webrtc", {
+      //   sdp: window.peerConnections[peerUuid].pc.localDescription,
+      //   uuid: window.localUuid,
+      //   dest: peerUuid,
+      // });
+      var msg = corelink_message("webrtc", {
+        sdp: window.peerConnections[peerUuid].pc.localDescription,
+        uuid: window.localUuid,
+        dest: peerUuid
+      });
+      corelink.send(metaroomWebrtcSender, msg);
+      console.log("corelink.send", msg);
+    }).catch(errorHandler);
   }
 }
+
 window.createdDescription = createdDescription;
 
 function gotRemoteStream(event, peerUuid) {
@@ -234,28 +206,27 @@ function gotRemoteStream(event, peerUuid) {
   // }
   // connection_uids[peerUuid] = true;
   console.log(`got remote stream, peer ${peerUuid}`);
-
   var vidElement = document.createElement("video");
   vidElement.setAttribute("autoplay", "");
   vidElement.setAttribute("muted", "");
   vidElement.srcObject = event.streams[0];
+
   vidElement.onloadedmetadata = function (e) {
     vidElement.muted = true;
   };
 
-  playAvatarAudio(event.streams[0], peerUuid);
+  playAvatarAudio(event.streams[0], peerUuid); // handle previous speakState
 
-  // handle previous speakState
   if (peerUuid in window.speakStates) {
     console.log("handle previous speak", peerUuid);
     window.mute(peerUuid, window.speakStates[peerUuid]);
   }
 
   var vidContainer = document.createElement("div");
-  vidContainer.setAttribute("id", "remoteAudio_" + peerUuid);
-  // vidContainer.appendChild(vidElement);
+  vidContainer.setAttribute("id", "remoteAudio_" + peerUuid); // vidContainer.appendChild(vidElement);
 
   var videosElement = document.getElementById("audios");
+
   if (videosElement == null) {
     videosElement = document.createElement("div");
     videosElement.setAttribute("id", "audios");
@@ -271,18 +242,18 @@ function transformQuat(out, vec, quat) {
   var a = vec;
   if (vec.x != undefined) a = [vec.x, vec.y, vec.z];
   let qx = q[0],
-    qy = q[1],
-    qz = q[2],
-    qw = q[3];
+      qy = q[1],
+      qz = q[2],
+      qw = q[3];
   let x = a[0],
-    y = a[1],
-    z = a[2];
+      y = a[1],
+      z = a[2];
   let uvx = qy * z - qz * y,
-    uvy = qz * x - qx * z,
-    uvz = qx * y - qy * x;
+      uvy = qz * x - qx * z,
+      uvz = qx * y - qy * x;
   let uuvx = qy * uvz - qz * uvy,
-    uuvy = qz * uvx - qx * uvz,
-    uuvz = qx * uvy - qy * uvx;
+      uuvy = qz * uvx - qx * uvz,
+      uuvz = qx * uvy - qy * uvx;
   let w2 = qw * 2;
   uvx *= w2;
   uvy *= w2;
@@ -303,33 +274,30 @@ function updateAvatarAudio(peerUuid) {
     var selfPos = window.avatars[window.playerid].headset.position;
     var selfRotation = window.avatars[window.playerid].headset.orientation;
     var selffwd = [0, 0, 0]; //vec3.create();
+
     transformQuat(selffwd, [0, 0, -1], selfRotation);
     var audioListener = window.peerConnections[peerUuid].audioContext.listener;
-    if (audioListener && selfPos.x != undefined) {
-      window.peerConnections[peerUuid].audioContext.listener.positionX.value =
-        selfPos.x;
-      window.peerConnections[peerUuid].audioContext.listener.positionY.value =
-        selfPos.y;
-      window.peerConnections[peerUuid].audioContext.listener.positionZ.value =
-        selfPos.z;
-      window.peerConnections[peerUuid].audioContext.listener.forwardX.value =
-        selffwd[0];
-      window.peerConnections[peerUuid].audioContext.listener.forwardY.value =
-        selffwd[1]; //0;
-      window.peerConnections[peerUuid].audioContext.listener.forwardZ.value =
-        selffwd[2];
-    }
 
-    // panner: audio source
+    if (audioListener && selfPos.x != undefined) {
+      window.peerConnections[peerUuid].audioContext.listener.positionX.value = selfPos.x;
+      window.peerConnections[peerUuid].audioContext.listener.positionY.value = selfPos.y;
+      window.peerConnections[peerUuid].audioContext.listener.positionZ.value = selfPos.z;
+      window.peerConnections[peerUuid].audioContext.listener.forwardX.value = selffwd[0];
+      window.peerConnections[peerUuid].audioContext.listener.forwardY.value = selffwd[1]; //0;
+
+      window.peerConnections[peerUuid].audioContext.listener.forwardZ.value = selffwd[2];
+    } // panner: audio source
+
+
     if (window.avatars[window.peerConnections[peerUuid].displayName].headset) {
-      var srcPos =
-        window.avatars[window.peerConnections[peerUuid].displayName].headset
-          .position;
+      var srcPos = window.avatars[window.peerConnections[peerUuid].displayName].headset.position;
       var srcFWD = [0, 0, 0]; //vec3.create();
       // window.(srcEuler, window.avatars[window.peerConnections[peerUuid].displayName].headset.orientation);
-      transformQuat(srcFWD, [0, 0, -1], selfRotation);
-      // quat.getEuler(srcEuler, srcOrientation);
+
+      transformQuat(srcFWD, [0, 0, -1], selfRotation); // quat.getEuler(srcEuler, srcOrientation);
+
       let panner = window.peerConnections[peerUuid].panner;
+
       if (panner && srcPos.x != undefined) {
         window.peerConnections[peerUuid].panner.positionX.value = srcPos.x;
         window.peerConnections[peerUuid].panner.positionY.value = srcPos.y;
@@ -338,11 +306,12 @@ function updateAvatarAudio(peerUuid) {
         window.peerConnections[peerUuid].panner.orientationY.value = srcFWD[1];
         window.peerConnections[peerUuid].panner.orientationZ.value = srcFWD[2];
       }
-    }
-    // console.log('pos src', selfPos, 'des', srcPos);
+    } // console.log('pos src', selfPos, 'des', srcPos);
     // console.log('euler src', selffwd, 'des', srcFWD);
+
   }
 }
+
 window.updateAvatarAudio = updateAvatarAudio;
 
 function playAvatarAudio(stream, peerUuid) {
@@ -351,26 +320,16 @@ function playAvatarAudio(stream, peerUuid) {
     // how many times this got called?
     // shall we update listener here?
     // Create a MediaStreamAudioSourceNode
-
     updateAvatarAudio(peerUuid);
+    var realAudioInput = new MediaStreamAudioSourceNode(window.peerConnections[peerUuid].audioContext, {
+      mediaStream: stream
+    }); // mute at the beginning
 
-    var realAudioInput = new MediaStreamAudioSourceNode(
-      window.peerConnections[peerUuid].audioContext,
-      {
-        mediaStream: stream,
-      }
-    );
-    // mute at the beginning
     realAudioInput.mediaStream.getAudioTracks()[0].enabled = false;
-
     window.peerConnections[peerUuid].audioInputStream = realAudioInput;
-
     console.log("playAvatarAudio", stream, peerUuid);
     realAudioInput.connect(window.peerConnections[peerUuid].panner);
-    window.peerConnections[peerUuid].panner.connect(
-      window.peerConnections[peerUuid].audioContext.destination
-    );
-    // realAudioInput.connect(that.audioContext.destination);
+    window.peerConnections[peerUuid].panner.connect(window.peerConnections[peerUuid].audioContext.destination); // realAudioInput.connect(that.audioContext.destination);
     // realAudioInput.connect(that.biquadFilter);
     // that.biquadFilter.connect(that.audioContext.destination);
   }
@@ -381,15 +340,11 @@ function testSpatialAudio() {
   window.testAudioElement.loop = true;
   window.testAudioElement.play();
   window.testAudioContext = new AudioContext();
-  window.testAudioContext.listener.positionY.value = 1.5;
-
-  // var realAudioInput = new MediaStreamAudioSourceNode(testAudioContext, {
+  window.testAudioContext.listener.positionY.value = 1.5; // var realAudioInput = new MediaStreamAudioSourceNode(testAudioContext, {
   //     mediaStream: audioSources[0].stream
   // });
-  var track = window.testAudioContext.createMediaElementSource(
-    window.testAudioElement
-  );
 
+  var track = window.testAudioContext.createMediaElementSource(window.testAudioElement);
   window.testPanner = new PannerNode(window.testAudioContext, {
     // equalpower or HRTF
     panningModel: "HRTF",
@@ -406,11 +361,12 @@ function testSpatialAudio() {
     rolloffFactor: 1.5,
     coneInnerAngle: 360,
     coneOuterAngle: 360,
-    coneOuterGain: 0.2,
+    coneOuterGain: 0.2
   });
   track.connect(window.testPanner);
   window.testPanner.connect(window.testAudioContext.destination);
 }
+
 window.testSpatialAudio = testSpatialAudio;
 
 function initAudio(peerUuid) {
@@ -423,73 +379,53 @@ function initAudio(peerUuid) {
     return true;
   }
 
-  if (
-    window.peerConnections[peerUuid] &&
-    window.avatars[window.peerConnections[peerUuid]] &&
-    "leave" in window.avatars[window.peerConnections[peerUuid].displayName]
-  ) {
+  if (window.peerConnections[peerUuid] && window.avatars[window.peerConnections[peerUuid]] && "leave" in window.avatars[window.peerConnections[peerUuid].displayName]) {
     console.log(window.peerConnections[peerUuid].displayName, "already left");
     return false;
   }
 
   if (!(window.peerConnections[peerUuid].displayName in window.avatars)) {
-    console.log(
-      "avatar[" +
-      window.peerConnections[peerUuid].displayName +
-      "] is not ready yet",
-      window.avatars
-    );
-    initAvatar(window.peerConnections[peerUuid].displayName);
-
-    // setTimeout(initAudio(peerUuid), 1000);
+    console.log("avatar[" + window.peerConnections[peerUuid].displayName + "] is not ready yet", window.avatars);
+    initAvatar(window.peerConnections[peerUuid].displayName); // setTimeout(initAudio(peerUuid), 1000);
     // return true;
   }
 
-  console.log(
-    "avatar[" +
-    window.peerConnections[peerUuid].displayName +
-    "] now setting up"
-  );
-
+  console.log("avatar[" + window.peerConnections[peerUuid].displayName + "] now setting up");
   window.peerConnections[peerUuid].audioContext = new AudioContext();
-
-  window.peerConnections[peerUuid].panner = new PannerNode(
-    window.peerConnections[peerUuid].audioContext,
-    {
-      // equalpower or HRTF
-      panningModel: "HRTF",
-      // linear, inverse, exponential
-      distanceModel: "linear",
-      positionX: 0,
-      positionY: 0,
-      positionZ: 0,
-      orientationX: 0.0,
-      orientationY: 0,
-      orientationZ: 0.0,
-      refDistance: 0.1,
-      maxDistance: 10000,
-      rolloffFactor: 1.5,
-      coneInnerAngle: 360,
-      coneOuterAngle: 360,
-      coneOuterGain: 0.2,
-    }
-  );
-
+  window.peerConnections[peerUuid].panner = new PannerNode(window.peerConnections[peerUuid].audioContext, {
+    // equalpower or HRTF
+    panningModel: "HRTF",
+    // linear, inverse, exponential
+    distanceModel: "linear",
+    positionX: 0,
+    positionY: 0,
+    positionZ: 0,
+    orientationX: 0.0,
+    orientationY: 0,
+    orientationZ: 0.0,
+    refDistance: 0.1,
+    maxDistance: 10000,
+    rolloffFactor: 1.5,
+    coneInnerAngle: 360,
+    coneOuterAngle: 360,
+    coneOuterGain: 0.2
+  });
   return true;
 }
 
 function checkPeerDisconnect(event, peerUuid) {
   var state = window.peerConnections[peerUuid].pc.iceConnectionState;
   console.log(`connection with peer ${peerUuid} ${state}`);
+
   if (state === "failed" || state === "closed" || state === "disconnected") {
-    delete window.peerConnections[peerUuid];
-    // delete connection_uids[peerUuid];
+    delete window.peerConnections[peerUuid]; // delete connection_uids[peerUuid];
   }
 }
 
 function errorHandler(error) {
   console.log(error);
 }
+
 window.errorHandler = errorHandler;
 
 window.muteSelf = function () {
@@ -498,10 +434,12 @@ window.muteSelf = function () {
   // });
   var msg = corelink_message("mute", {
     uuid: window.localUuid,
-    speak: window["demoSpeakState"]//0 speaking 1 muting
+    speak: window["demoSpeakState"] //0 speaking 1 muting
+
   });
   corelink.send(metaroomWebrtcSender, msg);
   console.log("corelink.send", msg);
+
   if (demoSpeakState % 2) {
     //false by default
     document.querySelector("#Speak").innerText = "Mute";

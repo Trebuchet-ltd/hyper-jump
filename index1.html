@@ -30,7 +30,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   <link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png" />
   <link rel="stylesheet" href="css/common.css" />
 
-  <title>2022 VR Class</title>
+  <title>2023 VR Class</title>
 
   <!-- <script src="https://cdn.jsdelivr.net/npm/resonance-audio/build/resonance-audio.min.js"></script> -->
   <script src="js/third-party/resonance-audio.min.js"></script>
@@ -44,41 +44,41 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 </head>
 
 <body>
-  <div id=videoElement></div>
+<div id=videoElement></div>
 
-  <header id=header>
-    <details open>
-      <summary>Welcome to the FutureClassroom!!</summary>
-      <dev id=messages>&nbsp;</dev>
-        <!-- <a class="back" href="./">Back</a> -->
-    </details>
-  </header>
-  <!-- <script type="module" src="js/primitive/avatar.js"></script> -->
-  <!-- <script type="module" src="js/util/voip-webrtc.js"></script> -->
-  <script type="module" src="js/corelink_handler.js"></script>
-  <script type="module" src="js/util/corelink_sender.js"></script>
-  <script type="module" src="js/util/voip-webrtc.js"></script>
-  <!-- <script type="module" src="js/util/positional-audio.js"></script> -->
-  <script type="module" src="js/immersive-pre.js"></script>
+<header id=header>
+  <details open>
+    <summary>Welcome to the FutureClassroom!!</summary>
+    <dev id=messages>&nbsp;</dev>
+    <!-- <a class="back" href="./">Back</a> -->
+  </details>
+</header>
+<!-- <script type="module" src="js/primitive/avatar.js"></script> -->
+<!-- <script type="module" src="js/util/voip-webrtc.js"></script> -->
+<script type="module" src="js/corelink_handler.js"></script>
+<script type="module" src="js/util/corelink_sender.js"></script>
+<script type="module" src="js/util/voip-webrtc.js"></script>
+<!-- <script type="module" src="js/util/positional-audio.js"></script> -->
+<script type="module" src="js/immersive-pre.js"></script>
 
-  <div id="audios">
-    <!-- local audio -->
-    <audio id="local_webrtc" autoplay></audio>
-  </div>
+<div id="audios">
+  <!-- local audio -->
+  <audio id="local_webrtc" autoplay></audio>
+</div>
 
 <script>
-if (! window.vr) {
-   videoElement.innerHTML = `
+  if (! window.vr) {
+    videoElement.innerHTML = `
    <video id="videoFromCamera" autoplay="true"
           style="position:absolute;left:-1000px;"
           width=640 height=480></video>`;
 
-   window.videoFromCamera = document.getElementById('videoFromCamera');
-   if (navigator.mediaDevices.getUserMedia)
-     navigator.mediaDevices.getUserMedia({ audio: false, video: true })
-              .then(function(stream) { videoFromCamera.srcObject = stream; },
-                    function(error ) { console.log(error); });
-}
+    window.videoFromCamera = document.getElementById('videoFromCamera');
+    if (navigator.mediaDevices.getUserMedia)
+      navigator.mediaDevices.getUserMedia({ audio: false, video: true })
+        .then(function(stream) { videoFromCamera.srcObject = stream; },
+          function(error ) { console.log(error); });
+  }
 </script>
 </body>
 

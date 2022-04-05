@@ -6,10 +6,8 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,11 +20,9 @@
 Renders simple text using a seven-segment LED style pattern. Only really good
 for numbers and a limited number of other characters.
 */
-
 import { Material } from "../core/material.js";
 import { Node } from "../core/node.js";
 import { Primitive, PrimitiveAttribute } from "../core/primitive.js";
-
 const TEXT_KERNING = 2.0;
 
 class SevenSegmentMaterial extends Material {
@@ -52,12 +48,12 @@ class SevenSegmentMaterial extends Material {
       return color;
     }`;
   }
+
 }
 
 export class SevenSegmentText extends Node {
   constructor() {
     super();
-
     this._text = "";
     this._charNodes = [];
   }
@@ -65,27 +61,25 @@ export class SevenSegmentText extends Node {
   onRendererChanged(renderer) {
     this.clearNodes();
     this._charNodes = [];
-
     let vertices = [];
     let segmentIndices = {};
     let indices = [];
-
     const width = 0.5;
     const thickness = 0.25;
 
     function defineSegment(id, left, top, right, bottom) {
       let idx = vertices.length / 2;
       vertices.push(left, top, right, top, right, bottom, left, bottom);
-
       segmentIndices[id] = [idx, idx + 2, idx + 1, idx, idx + 3, idx + 2];
     }
 
     let characters = {};
+
     function defineCharacter(c, segments) {
       let character = {
         character: c,
         offset: indices.length * 2,
-        count: 0,
+        count: 0
       };
 
       for (let i = 0; i < segments.length; ++i) {
@@ -97,16 +91,14 @@ export class SevenSegmentText extends Node {
 
       characters[c] = character;
     }
-
     /* Segment layout is as follows:
-
-    |-0-|
+     |-0-|
     3   4
     |-1-|
     5   6
     |-2-|
+     */
 
-    */
 
     defineSegment(0, -1, 1, width, 1 - thickness);
     defineSegment(1, -1, thickness * 0.5, width, -thickness * 0.5);
@@ -115,7 +107,6 @@ export class SevenSegmentText extends Node {
     defineSegment(4, width - thickness, 1, width, -thickness * 0.5);
     defineSegment(5, -1, thickness * 0.5, -1 + thickness, -1);
     defineSegment(6, width - thickness, thickness * 0.5, width, -1);
-
     defineCharacter("0", [0, 2, 3, 4, 5, 6]);
     defineCharacter("1", [4, 6]);
     defineCharacter("2", [0, 1, 2, 4, 5]);
@@ -138,33 +129,19 @@ export class SevenSegmentText extends Node {
     defineCharacter("_", [2]); // Used for undefined characters
 
     let gl = renderer.gl;
-    let vertexBuffer = renderer.createRenderBuffer(
-      gl.ARRAY_BUFFER,
-      new Float32Array(vertices)
-    );
-    let indexBuffer = renderer.createRenderBuffer(
-      gl.ELEMENT_ARRAY_BUFFER,
-      new Uint16Array(indices)
-    );
-
-    let vertexAttribs = [
-      new PrimitiveAttribute("POSITION", vertexBuffer, 2, gl.FLOAT, 8, 0),
-    ];
-
+    let vertexBuffer = renderer.createRenderBuffer(gl.ARRAY_BUFFER, new Float32Array(vertices));
+    let indexBuffer = renderer.createRenderBuffer(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices));
+    let vertexAttribs = [new PrimitiveAttribute("POSITION", vertexBuffer, 2, gl.FLOAT, 8, 0)];
     let primitive = new Primitive(vertexAttribs, indices.length);
     primitive.setIndexBuffer(indexBuffer);
-
     let material = new SevenSegmentMaterial();
-
     this._charPrimitives = {};
+
     for (let char in characters) {
       let charDef = characters[char];
       primitive.elementCount = charDef.count;
       primitive.indexByteOffset = charDef.offset;
-      this._charPrimitives[char] = renderer.createRenderPrimitive(
-        primitive,
-        material
-      );
+      this._charPrimitives[char] = renderer.createRenderPrimitive(primitive, material);
     }
 
     this.text = this._text;
@@ -176,9 +153,9 @@ export class SevenSegmentText extends Node {
 
   set text(value) {
     this._text = value;
-
     let i = 0;
     let charPrimitive = null;
+
     for (; i < value.length; ++i) {
       if (value[i] in this._charPrimitives) {
         charPrimitive = this._charPrimitives[value[i]];
@@ -191,21 +168,26 @@ export class SevenSegmentText extends Node {
         node.addRenderPrimitive(charPrimitive);
         let offset = i * TEXT_KERNING;
         node.translation = [offset, 0, 0];
+
         this._charNodes.push(node);
+
         this.addNode(node);
       } else {
         // This is sort of an abuse of how these things are expected to work,
         // but it's the cheapest thing I could think of that didn't break the
         // world.
         this._charNodes[i].clearRenderPrimitives();
+
         this._charNodes[i].addRenderPrimitive(charPrimitive);
+
         this._charNodes[i].visible = true;
       }
-    }
+    } // If there's any nodes left over make them invisible
 
-    // If there's any nodes left over make them invisible
+
     for (; i < this._charNodes.length; ++i) {
       this._charNodes[i].visible = false;
     }
   }
+
 }

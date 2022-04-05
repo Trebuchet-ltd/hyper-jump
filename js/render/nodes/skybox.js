@@ -6,10 +6,8 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,12 +19,10 @@
 /*
 Node for displaying 360 equirect images as a skybox.
 */
-
 import { Material, RENDER_ORDER } from "../core/material.js";
 import { Primitive, PrimitiveAttribute } from "../core/primitive.js";
 import { Node } from "../core/node.js";
 import { UrlTexture } from "../core/texture.js";
-
 const GL = WebGLRenderingContext; // For enums
 
 class SkyboxMaterial extends Material {
@@ -35,14 +31,8 @@ class SkyboxMaterial extends Material {
     this.renderOrder = RENDER_ORDER.SKY;
     this.state.depthFunc = GL.LEQUAL;
     this.state.depthMask = false;
-
     this.image = this.defineSampler("diffuse");
-
-    this.texCoordScaleOffset = this.defineUniform(
-      "texCoordScaleOffset",
-      [1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0],
-      4
-    );
+    this.texCoordScaleOffset = this.defineUniform("texCoordScaleOffset", [1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0], 4);
   }
 
   get materialName() {
@@ -80,12 +70,12 @@ class SkyboxMaterial extends Material {
       return texture2D(diffuse, vTexCoord);
     }`;
   }
+
 }
 
 export class SkyboxNode extends Node {
   constructor(options) {
     super();
-
     this._url = options.url;
     this._displayMode = options.displayMode || "mono";
     this._rotationY = options.rotationY || 0;
@@ -94,79 +84,62 @@ export class SkyboxNode extends Node {
   onRendererChanged(renderer) {
     let vertices = [];
     let indices = [];
-
     let latSegments = 40;
-    let lonSegments = 40;
+    let lonSegments = 40; // Create the vertices/indices
 
-    // Create the vertices/indices
     for (let i = 0; i <= latSegments; ++i) {
-      let theta = (i * Math.PI) / latSegments;
+      let theta = i * Math.PI / latSegments;
       let sinTheta = Math.sin(theta);
       let cosTheta = Math.cos(theta);
-
       let idxOffsetA = i * (lonSegments + 1);
       let idxOffsetB = (i + 1) * (lonSegments + 1);
 
       for (let j = 0; j <= lonSegments; ++j) {
-        let phi = (j * 2 * Math.PI) / lonSegments + this._rotationY;
+        let phi = j * 2 * Math.PI / lonSegments + this._rotationY;
         let x = Math.sin(phi) * sinTheta;
         let y = cosTheta;
         let z = -Math.cos(phi) * sinTheta;
         let u = j / lonSegments;
-        let v = i / latSegments;
-
-        // Vertex shader will force the geometry to the far plane, so the
+        let v = i / latSegments; // Vertex shader will force the geometry to the far plane, so the
         // radius of the sphere is immaterial.
+
         vertices.push(x, y, z, u, v);
 
         if (i < latSegments && j < lonSegments) {
           let idxA = idxOffsetA + j;
           let idxB = idxOffsetB + j;
-
           indices.push(idxA, idxB, idxA + 1, idxB, idxB + 1, idxA + 1);
         }
       }
     }
 
-    let vertexBuffer = renderer.createRenderBuffer(
-      GL.ARRAY_BUFFER,
-      new Float32Array(vertices)
-    );
-    let indexBuffer = renderer.createRenderBuffer(
-      GL.ELEMENT_ARRAY_BUFFER,
-      new Uint16Array(indices)
-    );
-
-    let attribs = [
-      new PrimitiveAttribute("POSITION", vertexBuffer, 3, GL.FLOAT, 20, 0),
-      new PrimitiveAttribute("TEXCOORD_0", vertexBuffer, 2, GL.FLOAT, 20, 12),
-    ];
-
+    let vertexBuffer = renderer.createRenderBuffer(GL.ARRAY_BUFFER, new Float32Array(vertices));
+    let indexBuffer = renderer.createRenderBuffer(GL.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices));
+    let attribs = [new PrimitiveAttribute("POSITION", vertexBuffer, 3, GL.FLOAT, 20, 0), new PrimitiveAttribute("TEXCOORD_0", vertexBuffer, 2, GL.FLOAT, 20, 12)];
     let primitive = new Primitive(attribs, indices.length);
     primitive.setIndexBuffer(indexBuffer);
-
     let material = new SkyboxMaterial();
     material.image.texture = new UrlTexture(this._url);
 
     switch (this._displayMode) {
       case 'mono':
         // prettier-ignore
-        material.texCoordScaleOffset.value = [1.0, 1.0, 0.0, 0.0,
-                                              1.0, 1.0, 0.0, 0.0];
+        material.texCoordScaleOffset.value = [1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0];
         break;
+
       case 'stereoTopBottom':
         // prettier-ignore
-        material.texCoordScaleOffset.value = [1.0, 0.5, 0.0, 0.0,
-                                              1.0, 0.5, 0.0, 0.5];
+        material.texCoordScaleOffset.value = [1.0, 0.5, 0.0, 0.0, 1.0, 0.5, 0.0, 0.5];
         break;
+
       case 'stereoLeftRight':
         // prettier-ignore
-        material.texCoordScaleOffset.value = [0.5, 1.0, 0.0, 0.0,
-                                              0.5, 1.0, 0.5, 0.0];
+        material.texCoordScaleOffset.value = [0.5, 1.0, 0.0, 0.0, 0.5, 1.0, 0.5, 0.0];
         break;
     }
 
     let renderPrimitive = renderer.createRenderPrimitive(primitive, material);
     this.addRenderPrimitive(renderPrimitive);
   }
+
 }

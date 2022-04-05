@@ -4,12 +4,11 @@ import { Gltf2Node } from "../render/nodes/gltf2.js";
 import { mat4, vec3 } from "../render/math/gl-matrix.js";
 import { corelink_event } from "../util/corelink_sender.js";
 import * as global from "../global.js";
-
 export function initAvatar(id) {
   let headset = new Headset();
   let leftController = new Controller("left");
-  let rightController = new Controller("right");
-  // setup render nodes for new avatar
+  let rightController = new Controller("right"); // setup render nodes for new avatar
+
   headset.model.name = "headset" + id;
   global.scene().addNode(headset.model);
   leftController.model.name = "LC" + id;
@@ -19,25 +18,23 @@ export function initAvatar(id) {
   let avatar = new Avatar(headset, id, leftController, rightController);
   window.avatars[id] = avatar;
 }
-
 export class Avatar {
   constructor(head, id, leftController, rightController) {
     this.playerid = id;
     this.headset = head;
     this.leftController = leftController;
-    this.rightController = rightController;
-    // TODO: Do we really want this to be the default?
+    this.rightController = rightController; // TODO: Do we really want this to be the default?
     // this.mode = MR.UserType.browser;
     // webrtc
+
     this.roomID = "chalktalk";
     this.localUuid = this.createUUID();
     this.localStream = null;
     this.name = "user" + id;
-    this.nameTagColor = [0.5 + Math.random(),0.5 + Math.random(),1.2 + 2 * Math.random()];
+    this.nameTagColor = [0.5 + Math.random(), 0.5 + Math.random(), 1.2 + 2 * Math.random()];
     this.vr = false;
+    this.audioContext = null; // toJson will be called in corelink_sender.js for generating the msg to be sent over corelink server
 
-    this.audioContext = null;
-    // toJson will be called in corelink_sender.js for generating the msg to be sent over corelink server
     this.toJson = function () {
       var jsonObj = {
         name: this.name,
@@ -51,20 +48,21 @@ export class Avatar {
             mtx: this.leftController.matrix,
             pos: this.leftController.position,
             rot: this.leftController.orientation,
-            btn: this.leftController.toJson(),
+            btn: this.leftController.toJson()
           },
           right: {
             mtx: this.rightController.matrix,
             pos: this.rightController.position,
             rot: this.rightController.orientation,
-            btn: this.rightController.toJson(),
-          },
-        },
-      }
-      // console.log("this.name", this.name, "jsonObj.name", jsonObj.name);
+            btn: this.rightController.toJson()
+          }
+        }
+      }; // console.log("this.name", this.name, "jsonObj.name", jsonObj.name);
+
       return jsonObj;
-    }
-    // fromJson will be called in event.js for unpacking the msg from the server
+    }; // fromJson will be called in event.js for unpacking the msg from the server
+
+
     this.fromJson = function (payload) {
       this.headset.matrix = payload["state"]["mtx"];
       this.headset.position = payload["state"]["pos"];
@@ -83,11 +81,11 @@ export class Avatar {
       this.name = payload["state"]["name"];
       this.nameTagColor = payload["state"]["color"];
       this.device = payload["state"]["device"];
-    }
-  }
-
-  // Taken from http://stackoverflow.com/a/105074/515584
+    };
+  } // Taken from http://stackoverflow.com/a/105074/515584
   // Strictly speaking, it's not a real UUID, but it gets the job done here
+
+
   createUUID() {
     function s4() {
       return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
@@ -95,21 +93,23 @@ export class Avatar {
 
     return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
   }
-}
 
+}
 export class Headset {
   constructor(verts) {
     // this.vertices = verts;
     this.position = vec3.fromValues(0, 0, 0);
     this.orientation = [0, 0, 0, 1];
     this.matrix = mat4.fromValues(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-    this.model = new Gltf2Node({ url: './media/gltf/headset/headset.gltf' });
+    this.model = new Gltf2Node({
+      url: './media/gltf/headset/headset.gltf'
+    });
     this.model.scale = vec3.fromValues(1, 1, 1);
     this.model.name = "headset";
     this.model.visible = false;
   }
-}
 
+}
 export class Controller {
   constructor(handedness) {
     // this.vertices = verts;
@@ -119,16 +119,20 @@ export class Controller {
     this.analog = new Button();
     this.trigger = new Button();
     this.buttons = null;
-    this.prevbuttons = null;
-    // this.side = new Button();
+    this.prevbuttons = null; // this.side = new Button();
     // this.x = new Button();
     // this.y = new Button();
+
     if (handedness == "left") {
-      this.model = new Gltf2Node({ url: './media/gltf/controller/controller-left.gltf' });
+      this.model = new Gltf2Node({
+        url: './media/gltf/controller/controller-left.gltf'
+      });
+    } else {
+      this.model = new Gltf2Node({
+        url: './media/gltf/controller/controller.gltf'
+      });
     }
-    else {
-      this.model = new Gltf2Node({ url: './media/gltf/controller/controller.gltf' });
-    }
+
     this.matrix = mat4.fromValues(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
     this.model.scale = vec3.fromValues(1, 1, 1);
     this.model.name = "ctrl";
@@ -139,59 +143,68 @@ export class Controller {
       // if (this.prevbuttons)
       // console.log("updateButtons", this.prevbuttons[3].pressed, this.buttons[3].pressed);
       for (let i = 0; i < 7; i++) {
-        if ((this.buttons && !this.prevbuttons && this.buttons[i].pressed)
-          || (this.prevbuttons && this.buttons[i].pressed && !this.prevbuttons[i].pressed)) {
-          corelink_event({ it: this.handedness + "trigger", op: "press" });
-        }
-        else if ((this.buttons && !this.prevbuttons && this.buttons[i].pressed)
-          || (this.prevbuttons && this.buttons[i].pressed && this.prevbuttons[i].pressed))
-          corelink_event({ it: this.handedness + "trigger", op: "drag" });
-        else if ((this.buttons && !this.prevbuttons && !this.buttons[i].pressed)
-          || (this.prevbuttons && !this.buttons[i].pressed && this.prevbuttons[i].pressed))
-          corelink_event({ it: this.handedness + "trigger", op: "release" });
+        if (this.buttons && !this.prevbuttons && this.buttons[i].pressed || this.prevbuttons && this.buttons[i].pressed && !this.prevbuttons[i].pressed) {
+          corelink_event({
+            it: this.handedness + "trigger",
+            op: "press"
+          });
+        } else if (this.buttons && !this.prevbuttons && this.buttons[i].pressed || this.prevbuttons && this.buttons[i].pressed && this.prevbuttons[i].pressed) corelink_event({
+          it: this.handedness + "trigger",
+          op: "drag"
+        });else if (this.buttons && !this.prevbuttons && !this.buttons[i].pressed || this.prevbuttons && !this.buttons[i].pressed && this.prevbuttons[i].pressed) corelink_event({
+          it: this.handedness + "trigger",
+          op: "release"
+        });
       }
+
       if (this.buttons) {
         if (!this.prevbuttons) {
-          this.prevbuttons = Array.from({ length: 7 }, (v, i) => i);
+          this.prevbuttons = Array.from({
+            length: 7
+          }, (v, i) => i);
+
           for (let i = 0; i < 7; i++) {
             this.prevbuttons[i] = {
               pressed: false,
-              touched: false,
+              touched: false
             };
           }
-        }
+        } // this.prevbuttons = Array.from(this.buttons);
 
-        // this.prevbuttons = Array.from(this.buttons);
+
         for (let i = 0; i < 7; i++) {
-          this.prevbuttons[i].pressed = this.buttons[i].pressed;//JSON.parse(JSON.stringify(this.buttons[i]));
+          this.prevbuttons[i].pressed = this.buttons[i].pressed; //JSON.parse(JSON.stringify(this.buttons[i]));
+
           this.prevbuttons[i].touched = this.buttons[i].touched;
         }
       }
 
       this.buttons = newBtns;
-    }
+    };
 
     this.toJson = function () {
       var jsonObj = {
         analog: this.analog.pressed,
         trigger: this.trigger.pressed,
         handedness: this.handedness,
-        buttons: this.buttons,
-      }
-      // console.log("this.name", this.name, "jsonObj.name", jsonObj.name);
+        buttons: this.buttons
+      }; // console.log("this.name", this.name, "jsonObj.name", jsonObj.name);
+
       return jsonObj;
-    }
-    // fromJson will be called in event.js for unpacking the msg from the server
+    }; // fromJson will be called in event.js for unpacking the msg from the server
+
+
     this.fromJson = function (payload) {
       this.analog.pressed = payload["analog"];
       this.trigger.pressed = payload["trigger"];
       this.buttons = payload["buttons"];
-    }
+    };
   }
-}
 
+}
 export class Button {
   //buttons have a 'pressed' variable that is a boolean.
+
   /*A quick mapping of the buttons:
     0: analog stick
     1: trigger
@@ -203,8 +216,9 @@ export class Button {
   constructor() {
     this.pressed = false;
   }
+
 }
 
 window.updateName = function () {
   window.avatars[window.playerid].name = document.getElementById("name").value;
-}
+};

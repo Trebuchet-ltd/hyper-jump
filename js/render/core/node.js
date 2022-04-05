@@ -6,10 +6,8 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -17,39 +15,31 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
 import { Ray } from "../math/ray.js";
 import { mat4, vec3, quat } from "../math/gl-matrix.js";
-
 const DEFAULT_TRANSLATION = new Float32Array([0, 0, 0]);
 const DEFAULT_ROTATION = new Float32Array([0, 0, 0, 1]);
 const DEFAULT_SCALE = new Float32Array([1, 1, 1]);
-
 let tmpRayMatrix = mat4.create();
-
 export class Node {
   constructor() {
     this.name = null; // Only for debugging
+
     this.children = [];
     this.parent = null;
     this.visible = true;
     this.selectable = false;
-
     this._matrix = null;
-
     this._dirtyTRS = false;
     this._translation = null;
     this._rotation = null;
     this._scale = null;
-
     this._dirtyWorldMatrix = false;
     this._worldMatrix = null;
-
     this._activeFrameId = -1;
     this._hoverFrameId = -1;
     this._renderPrimitives = null;
     this._renderer = null;
-
     this._selectHandler = null;
   }
 
@@ -65,6 +55,7 @@ export class Node {
     }
 
     this._renderer = renderer;
+
     if (renderer) {
       this.onRendererChanged(renderer);
 
@@ -74,19 +65,17 @@ export class Node {
     }
   }
 
-  onRendererChanged(renderer) {
-    // Override in other node types to respond to changes in the renderer.
-  }
-
-  // Create a clone of this node and all of it's children. Does not duplicate
+  onRendererChanged(renderer) {// Override in other node types to respond to changes in the renderer.
+  } // Create a clone of this node and all of it's children. Does not duplicate
   // RenderPrimitives, the cloned nodes will be treated as new instances of the
   // geometry.
+
+
   clone() {
     let cloneNode = new Node();
     cloneNode.name = this.name;
     cloneNode.visible = this.visible;
     cloneNode._renderer = this._renderer;
-
     cloneNode._dirtyTRS = this._dirtyTRS;
 
     if (this._translation) {
@@ -102,15 +91,16 @@ export class Node {
     if (this._scale) {
       cloneNode._scale = vec3.create();
       vec3.copy(cloneNode._scale, this._scale);
-    }
+    } // Only copy the matrices if they're not already dirty.
 
-    // Only copy the matrices if they're not already dirty.
+
     if (!cloneNode._dirtyTRS && this._matrix) {
       cloneNode._matrix = mat4.create();
       mat4.copy(cloneNode._matrix, this._matrix);
     }
 
     cloneNode._dirtyWorldMatrix = this._dirtyWorldMatrix;
+
     if (!cloneNode._dirtyWorldMatrix && this._worldMatrix) {
       cloneNode._worldMatrix = mat4.create();
       mat4.copy(cloneNode._worldMatrix, this._worldMatrix);
@@ -127,13 +117,13 @@ export class Node {
         cloneNode.addNode(child.clone());
       }
     });
-
     return cloneNode;
   }
 
   markActive(frameId) {
     if (this.visible && this._renderPrimitives) {
       this._activeFrameId = frameId;
+
       for (let primitive of this._renderPrimitives) {
         primitive.markActive(frameId);
       }
@@ -154,18 +144,20 @@ export class Node {
     if (value.parent) {
       value.parent.removeNode(value);
     }
-    value.parent = this;
 
+    value.parent = this;
     this.children.push(value);
 
     if (this._renderer) {
       value._setRenderer(this._renderer);
     }
+
     return this.children[this.children.length - 1];
   }
 
   removeNode(value) {
     let i = this.children.indexOf(value);
+
     if (i > -1) {
       this.children.splice(i, 1);
       value.parent = null;
@@ -176,12 +168,14 @@ export class Node {
     for (let child of this.children) {
       child.parent = null;
     }
+
     this.children = [];
   }
 
   setMatrixDirty() {
     if (!this._dirtyWorldMatrix) {
       this._dirtyWorldMatrix = true;
+
       for (let child of this.children) {
         child.setMatrixDirty();
       }
@@ -195,12 +189,7 @@ export class Node {
 
     if (this._dirtyTRS) {
       this._dirtyTRS = false;
-      mat4.fromRotationTranslationScale(
-        this._matrix,
-        this._rotation || DEFAULT_ROTATION,
-        this._translation || DEFAULT_TRANSLATION,
-        this._scale || DEFAULT_SCALE
-      );
+      mat4.fromRotationTranslationScale(this._matrix, this._rotation || DEFAULT_ROTATION, this._translation || DEFAULT_TRANSLATION, this._scale || DEFAULT_SCALE);
     }
 
     return this._matrix;
@@ -211,10 +200,12 @@ export class Node {
       if (!this._matrix) {
         this._matrix = mat4.create();
       }
+
       mat4.copy(this._matrix, value);
     } else {
       this._matrix = null;
     }
+
     this.setMatrixDirty();
     this._dirtyTRS = false;
     this._translation = null;
@@ -224,7 +215,6 @@ export class Node {
 
   get matrix() {
     this.setMatrixDirty();
-
     return this._updateLocalMatrix();
   }
 
@@ -238,35 +228,35 @@ export class Node {
       if (this.parent) {
         // TODO: Some optimizations that could be done here if the node matrix
         // is an identity matrix.
-        mat4.mul(
-          this._worldMatrix,
-          this.parent.worldMatrix,
-          this._updateLocalMatrix()
-        );
+        mat4.mul(this._worldMatrix, this.parent.worldMatrix, this._updateLocalMatrix());
       } else {
         mat4.copy(this._worldMatrix, this._updateLocalMatrix());
       }
+
       this._dirtyWorldMatrix = false;
     }
 
     return this._worldMatrix;
-  }
+  } // TODO: Decompose matrix when fetching these?
 
-  // TODO: Decompose matrix when fetching these?
+
   set translation(value) {
     if (value != null) {
       this._dirtyTRS = true;
       this.setMatrixDirty();
     }
+
     this._translation = value;
   }
 
   get translation() {
     this._dirtyTRS = true;
     this.setMatrixDirty();
+
     if (!this._translation) {
       this._translation = vec3.clone(DEFAULT_TRANSLATION);
     }
+
     return this._translation;
   }
 
@@ -275,15 +265,18 @@ export class Node {
       this._dirtyTRS = true;
       this.setMatrixDirty();
     }
+
     this._rotation = value;
   }
 
   get rotation() {
     this._dirtyTRS = true;
     this.setMatrixDirty();
+
     if (!this._rotation) {
       this._rotation = quat.clone(DEFAULT_ROTATION);
     }
+
     return this._rotation;
   }
 
@@ -292,28 +285,34 @@ export class Node {
       this._dirtyTRS = true;
       this.setMatrixDirty();
     }
+
     this._scale = value;
   }
 
   get scale() {
     this._dirtyTRS = true;
     this.setMatrixDirty();
+
     if (!this._scale) {
       this._scale = vec3.clone(DEFAULT_SCALE);
     }
+
     return this._scale;
   }
 
   waitForComplete() {
     let childPromises = [];
+
     for (let child of this.children) {
       childPromises.push(child.waitForComplete());
     }
+
     if (this._renderPrimitives) {
       for (let primitive of this._renderPrimitives) {
         childPromises.push(primitive.waitForComplete());
       }
     }
+
     return Promise.all(childPromises).then(() => this);
   }
 
@@ -327,6 +326,7 @@ export class Node {
     } else {
       this._renderPrimitives.push(primitive);
     }
+
     primitive._instances.push(this);
   }
 
@@ -336,10 +336,12 @@ export class Node {
     }
 
     let index = this._renderPrimitives._instances.indexOf(primitive);
+
     if (index > -1) {
       this._renderPrimitives._instances.splice(index, 1);
 
       index = primitive._instances.indexOf(this);
+
       if (index > -1) {
         primitive._instances.splice(index, 1);
       }
@@ -354,10 +356,12 @@ export class Node {
     if (this._renderPrimitives) {
       for (let primitive of this._renderPrimitives) {
         let index = primitive._instances.indexOf(this);
+
         if (index > -1) {
           primitive._instances.splice(index, 1);
         }
       }
+
       this._renderPrimitives = null;
     }
   }
@@ -365,6 +369,7 @@ export class Node {
   _hitTestSelectableNode(rigidTransform) {
     if (this._renderPrimitives) {
       let localRay = null;
+
       for (let primitive of this._renderPrimitives) {
         if (primitive._min) {
           if (!localRay) {
@@ -372,10 +377,9 @@ export class Node {
             mat4.multiply(tmpRayMatrix, tmpRayMatrix, rigidTransform.matrix);
             localRay = new Ray(tmpRayMatrix);
           }
-          let intersection = localRay.intersectsAABB(
-            primitive._min,
-            primitive._max
-          );
+
+          let intersection = localRay.intersectsAABB(primitive._min, primitive._max);
+
           if (intersection) {
             vec3.transformMat4(intersection, intersection, this.worldMatrix);
             return intersection;
@@ -383,12 +387,15 @@ export class Node {
         }
       }
     }
+
     for (let child of this.children) {
       let intersection = child._hitTestSelectableNode(rigidTransform);
+
       if (intersection) {
         return intersection;
       }
     }
+
     return null;
   }
 
@@ -402,21 +409,25 @@ export class Node {
         return {
           node: this,
           intersection: intersection,
-          distance: vec3.distance(origin, intersection),
+          distance: vec3.distance(origin, intersection)
         };
       }
+
       return null;
     }
 
     let result = null;
+
     for (let child of this.children) {
       let childResult = child.hitTest(rigidTransform);
+
       if (childResult) {
         if (!result || result.distance > childResult.distance) {
           result = childResult;
         }
       }
     }
+
     return result;
   }
 
@@ -426,19 +437,19 @@ export class Node {
 
   get selectHandler() {
     return this._selectHandler;
-  }
+  } // Called when a selectable node is selected.
 
-  // Called when a selectable node is selected.
+
   handleSelect() {
     if (this._selectHandler) {
       this._selectHandler();
     }
-  }
+  } // Called when a selectable element is pointed at.
 
-  // Called when a selectable element is pointed at.
-  onHoverStart() {}
 
-  // Called when a selectable element is no longer pointed at.
+  onHoverStart() {} // Called when a selectable element is no longer pointed at.
+
+
   onHoverEnd() {}
 
   _update(timestamp, frameDelta) {
@@ -447,8 +458,9 @@ export class Node {
     for (let child of this.children) {
       child._update(timestamp, frameDelta);
     }
-  }
+  } // Called every frame so that the nodes can animate themselves
 
-  // Called every frame so that the nodes can animate themselves
+
   onUpdate(timestamp, frameDelta) {}
+
 }

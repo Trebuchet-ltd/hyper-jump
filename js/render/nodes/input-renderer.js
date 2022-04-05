@@ -6,10 +6,8 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -17,45 +15,27 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
 import { Material, RENDER_ORDER } from '../core/material.js';
 import { Node } from '../core/node.js';
 import { Primitive, PrimitiveAttribute } from '../core/primitive.js';
 import { DataTexture } from '../core/texture.js';
-import { Gltf2Node } from '../nodes/gltf2.js';
-
-// This library matches XRInputSource profiles to available controller models for us.
+import { Gltf2Node } from '../nodes/gltf2.js'; // This library matches XRInputSource profiles to available controller models for us.
 // import { fetchProfile } from 'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/motion-controllers@1.0/dist/motion-controllers.module.js';
-import { fetchProfile } from '../../third-party/motion-controllers.module.js'
-// The path of the CDN the sample will fetch controller models from.
+
+import { fetchProfile } from '../../third-party/motion-controllers.module.js'; // The path of the CDN the sample will fetch controller models from.
+
 const DEFAULT_PROFILES_PATH = 'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles';
-
 const GL = WebGLRenderingContext; // For enums
-
 // Laser texture data, 48x1 RGBA (not premultiplied alpha). This represents a
 // "cross section" of the laser beam with a bright core and a feathered edge.
 // Borrowed from Chromium source code.
-const LASER_TEXTURE_DATA = new Uint8Array([
-  0xff, 0xff, 0xff, 0x01, 0xff, 0xff, 0xff, 0x02, 0xbf, 0xbf, 0xbf, 0x04, 0xcc, 0xcc, 0xcc, 0x05,
-  0xdb, 0xdb, 0xdb, 0x07, 0xcc, 0xcc, 0xcc, 0x0a, 0xd8, 0xd8, 0xd8, 0x0d, 0xd2, 0xd2, 0xd2, 0x11,
-  0xce, 0xce, 0xce, 0x15, 0xce, 0xce, 0xce, 0x1a, 0xce, 0xce, 0xce, 0x1f, 0xcd, 0xcd, 0xcd, 0x24,
-  0xc8, 0xc8, 0xc8, 0x2a, 0xc9, 0xc9, 0xc9, 0x2f, 0xc9, 0xc9, 0xc9, 0x34, 0xc9, 0xc9, 0xc9, 0x39,
-  0xc9, 0xc9, 0xc9, 0x3d, 0xc8, 0xc8, 0xc8, 0x41, 0xcb, 0xcb, 0xcb, 0x44, 0xee, 0xee, 0xee, 0x87,
-  0xfa, 0xfa, 0xfa, 0xc8, 0xf9, 0xf9, 0xf9, 0xc9, 0xf9, 0xf9, 0xf9, 0xc9, 0xfa, 0xfa, 0xfa, 0xc9,
-  0xfa, 0xfa, 0xfa, 0xc9, 0xf9, 0xf9, 0xf9, 0xc9, 0xf9, 0xf9, 0xf9, 0xc9, 0xfa, 0xfa, 0xfa, 0xc8,
-  0xee, 0xee, 0xee, 0x87, 0xcb, 0xcb, 0xcb, 0x44, 0xc8, 0xc8, 0xc8, 0x41, 0xc9, 0xc9, 0xc9, 0x3d,
-  0xc9, 0xc9, 0xc9, 0x39, 0xc9, 0xc9, 0xc9, 0x34, 0xc9, 0xc9, 0xc9, 0x2f, 0xc8, 0xc8, 0xc8, 0x2a,
-  0xcd, 0xcd, 0xcd, 0x24, 0xce, 0xce, 0xce, 0x1f, 0xce, 0xce, 0xce, 0x1a, 0xce, 0xce, 0xce, 0x15,
-  0xd2, 0xd2, 0xd2, 0x11, 0xd8, 0xd8, 0xd8, 0x0d, 0xcc, 0xcc, 0xcc, 0x0a, 0xdb, 0xdb, 0xdb, 0x07,
-  0xcc, 0xcc, 0xcc, 0x05, 0xbf, 0xbf, 0xbf, 0x04, 0xff, 0xff, 0xff, 0x02, 0xff, 0xff, 0xff, 0x01,
-]);
 
+const LASER_TEXTURE_DATA = new Uint8Array([0xff, 0xff, 0xff, 0x01, 0xff, 0xff, 0xff, 0x02, 0xbf, 0xbf, 0xbf, 0x04, 0xcc, 0xcc, 0xcc, 0x05, 0xdb, 0xdb, 0xdb, 0x07, 0xcc, 0xcc, 0xcc, 0x0a, 0xd8, 0xd8, 0xd8, 0x0d, 0xd2, 0xd2, 0xd2, 0x11, 0xce, 0xce, 0xce, 0x15, 0xce, 0xce, 0xce, 0x1a, 0xce, 0xce, 0xce, 0x1f, 0xcd, 0xcd, 0xcd, 0x24, 0xc8, 0xc8, 0xc8, 0x2a, 0xc9, 0xc9, 0xc9, 0x2f, 0xc9, 0xc9, 0xc9, 0x34, 0xc9, 0xc9, 0xc9, 0x39, 0xc9, 0xc9, 0xc9, 0x3d, 0xc8, 0xc8, 0xc8, 0x41, 0xcb, 0xcb, 0xcb, 0x44, 0xee, 0xee, 0xee, 0x87, 0xfa, 0xfa, 0xfa, 0xc8, 0xf9, 0xf9, 0xf9, 0xc9, 0xf9, 0xf9, 0xf9, 0xc9, 0xfa, 0xfa, 0xfa, 0xc9, 0xfa, 0xfa, 0xfa, 0xc9, 0xf9, 0xf9, 0xf9, 0xc9, 0xf9, 0xf9, 0xf9, 0xc9, 0xfa, 0xfa, 0xfa, 0xc8, 0xee, 0xee, 0xee, 0x87, 0xcb, 0xcb, 0xcb, 0x44, 0xc8, 0xc8, 0xc8, 0x41, 0xc9, 0xc9, 0xc9, 0x3d, 0xc9, 0xc9, 0xc9, 0x39, 0xc9, 0xc9, 0xc9, 0x34, 0xc9, 0xc9, 0xc9, 0x2f, 0xc8, 0xc8, 0xc8, 0x2a, 0xcd, 0xcd, 0xcd, 0x24, 0xce, 0xce, 0xce, 0x1f, 0xce, 0xce, 0xce, 0x1a, 0xce, 0xce, 0xce, 0x15, 0xd2, 0xd2, 0xd2, 0x11, 0xd8, 0xd8, 0xd8, 0x0d, 0xcc, 0xcc, 0xcc, 0x0a, 0xdb, 0xdb, 0xdb, 0x07, 0xcc, 0xcc, 0xcc, 0x05, 0xbf, 0xbf, 0xbf, 0x04, 0xff, 0xff, 0xff, 0x02, 0xff, 0xff, 0xff, 0x01]);
 const LASER_LENGTH = 1.0;
 const LASER_DIAMETER = 0.01;
 const LASER_FADE_END = 0.535;
 const LASER_FADE_POINT = 0.5335;
 const LASER_DEFAULT_COLOR = [1.0, 1.0, 1.0, 0.25];
-
 const CURSOR_RADIUS = 0.004;
 const CURSOR_SHADOW_RADIUS = 0.007;
 const CURSOR_SHADOW_INNER_LUMINANCE = 0.5;
@@ -66,11 +46,10 @@ const CURSOR_OPACITY = 0.9;
 const CURSOR_SEGMENTS = 16;
 const CURSOR_DEFAULT_COLOR = [1.0, 1.0, 1.0, 1.0];
 const CURSOR_DEFAULT_HIDDEN_COLOR = [0.5, 0.5, 0.5, 0.25];
-
 const DEFAULT_RESET_OPTIONS = {
   controllers: true,
   lasers: true,
-  cursors: true,
+  cursors: true
 };
 
 class LaserMaterial extends Material {
@@ -82,7 +61,6 @@ class LaserMaterial extends Material {
     this.state.blendFuncSrc = GL.ONE;
     this.state.blendFuncDst = GL.ONE;
     this.state.depthMask = false;
-
     this.laser = this.defineSampler('diffuse');
     this.laser.texture = new DataTexture(LASER_TEXTURE_DATA, 48, 1);
     this.laserColor = this.defineUniform('laserColor', LASER_DEFAULT_COLOR);
@@ -125,6 +103,7 @@ class LaserMaterial extends Material {
       return vec4(color.rgb * opacity, opacity);
     }`;
   }
+
 }
 
 const CURSOR_VERTEX_SHADER = `
@@ -143,7 +122,6 @@ vec4 vertex_main(mat4 proj, mat4 view, mat4 model) {
   screenPos.xy += POSITION.xy;
   return screenPos;
 }`;
-
 const CURSOR_FRAGMENT_SHADER = `
 precision mediump float;
 
@@ -155,10 +133,9 @@ vec4 fragment_main() {
   vec3 color = cursorColor.rgb * vLuminance;
   float opacity = cursorColor.a * vOpacity;
   return vec4(color * opacity, opacity);
-}`;
-
-// Cursors are drawn as billboards that always face the camera and are rendered
+}`; // Cursors are drawn as billboards that always face the camera and are rendered
 // as a fixed size no matter how far away they are.
+
 class CursorMaterial extends Material {
   constructor() {
     super();
@@ -167,7 +144,6 @@ class CursorMaterial extends Material {
     this.state.blend = true;
     this.state.blendFuncSrc = GL.ONE;
     this.state.depthMask = false;
-
     this.cursorColor = this.defineUniform('cursorColor', CURSOR_DEFAULT_COLOR);
   }
 
@@ -182,6 +158,7 @@ class CursorMaterial extends Material {
   get fragmentSource() {
     return CURSOR_FRAGMENT_SHADER;
   }
+
 }
 
 class CursorHiddenMaterial extends Material {
@@ -193,11 +170,10 @@ class CursorHiddenMaterial extends Material {
     this.state.blendFuncSrc = GL.ONE;
     this.state.depthFunc = GL.GEQUAL;
     this.state.depthMask = false;
-
     this.cursorColor = this.defineUniform('cursorColor', CURSOR_DEFAULT_HIDDEN_COLOR);
-  }
+  } // TODO: Rename to "program_name"
 
-  // TODO: Rename to "program_name"
+
   get materialName() {
     return 'INPUT_CURSOR_2';
   }
@@ -209,18 +185,16 @@ class CursorHiddenMaterial extends Material {
   get fragmentSource() {
     return CURSOR_FRAGMENT_SHADER;
   }
+
 }
 
 export class InputRenderer extends Node {
   constructor() {
     super();
-
     this._maxInputElements = 32;
-
     this._controllers = null;
     this._lasers = null;
     this._cursors = null;
-
     this._activeControllers = 0;
     this._activeLasers = 0;
     this._activeCursors = 0;
@@ -230,7 +204,6 @@ export class InputRenderer extends Node {
     this._controllers = null;
     this._lasers = null;
     this._cursors = null;
-
     this._activeControllers = 0;
     this._activeLasers = 0;
     this._activeCursors = 0;
@@ -240,11 +213,16 @@ export class InputRenderer extends Node {
     // As input sources are connected if they are tracked-pointer devices
     // look up which meshes should be associated with their profile and
     // load as the controller model for that hand.
-    session.addEventListener('inputsourceschange', (event) => {
+    session.addEventListener('inputsourceschange', event => {
       for (let inputSource of event.added) {
         if (inputSource.targetRayMode == 'tracked-pointer') {
-          fetchProfile(inputSource, DEFAULT_PROFILES_PATH).then(({ profile, assetPath }) => {
-            this.setControllerMesh(new Gltf2Node({ url: assetPath }), inputSource.handedness);
+          fetchProfile(inputSource, DEFAULT_PROFILES_PATH).then(({
+            profile,
+            assetPath
+          }) => {
+            this.setControllerMesh(new Gltf2Node({
+              url: assetPath
+            }), inputSource.handedness);
           });
         }
       }
@@ -255,19 +233,29 @@ export class InputRenderer extends Node {
     if (!this._controllers) {
       this._controllers = {};
     }
-    this._controllers[handedness] = { nodes: [controllerNode], activeCount: 0 };
-    controllerNode.visible = false;
-    // FIXME: Temporary fix to initialize for cloning.
+
+    this._controllers[handedness] = {
+      nodes: [controllerNode],
+      activeCount: 0
+    };
+    controllerNode.visible = false; // FIXME: Temporary fix to initialize for cloning.
+
     this.addNode(controllerNode);
   }
 
   addController(gripMatrix, handedness = 'right') {
-    if (!this._controllers) { return; }
+    if (!this._controllers) {
+      return;
+    }
+
     let controller = this._controllers[handedness];
 
-    if (!controller) { return; }
+    if (!controller) {
+      return;
+    }
 
     let controllerNode = null;
+
     if (controller.activeCount < controller.nodes.length) {
       controllerNode = controller.nodes[controller.activeCount];
     } else {
@@ -275,8 +263,8 @@ export class InputRenderer extends Node {
       this.addNode(controllerNode);
       controller.nodes.push(controllerNode);
     }
-    controller.activeCount = (controller.activeCount + 1) % this._maxInputElements;
 
+    controller.activeCount = (controller.activeCount + 1) % this._maxInputElements;
     controllerNode.matrix = gripMatrix;
     controllerNode.visible = true;
   }
@@ -289,15 +277,17 @@ export class InputRenderer extends Node {
     }
 
     let laser = null;
+
     if (this._activeLasers < this._lasers.length) {
       laser = this._lasers[this._activeLasers];
     } else {
       laser = this._lasers[0].clone();
       this.addNode(laser);
+
       this._lasers.push(laser);
     }
-    this._activeLasers = (this._activeLasers + 1) % this._maxInputElements;
 
+    this._activeLasers = (this._activeLasers + 1) % this._maxInputElements;
     laser.matrix = rigidTransform.matrix;
     laser.visible = true;
   }
@@ -310,15 +300,17 @@ export class InputRenderer extends Node {
     }
 
     let cursor = null;
+
     if (this._activeCursors < this._cursors.length) {
       cursor = this._cursors[this._activeCursors];
     } else {
       cursor = this._cursors[0].clone();
       this.addNode(cursor);
+
       this._cursors.push(cursor);
     }
-    this._activeCursors = (this._activeCursors + 1) % this._maxInputElements;
 
+    this._activeCursors = (this._activeCursors + 1) % this._maxInputElements;
     cursor.translation = cursorPos;
     cursor.visible = true;
   }
@@ -327,98 +319,70 @@ export class InputRenderer extends Node {
     if (!options) {
       options = DEFAULT_RESET_OPTIONS;
     }
+
     if (this._controllers && options.controllers) {
       for (let handedness in this._controllers) {
         let controller = this._controllers[handedness];
         controller.activeCount = 0;
+
         for (let controllerNode of controller.nodes) {
           controllerNode.visible = false;
         }
       }
     }
+
     if (this._lasers && options.lasers) {
       for (let laser of this._lasers) {
         laser.visible = false;
       }
+
       this._activeLasers = 0;
     }
+
     if (this._cursors && options.cursors) {
       for (let cursor of this._cursors) {
         cursor.visible = false;
       }
+
       this._activeCursors = 0;
     }
   }
 
   _createLaserMesh() {
     let gl = this._renderer._gl;
-
     let lr = LASER_DIAMETER * 0.5;
-    let ll = LASER_LENGTH;
+    let ll = LASER_LENGTH; // Laser is rendered as cross-shaped beam
 
-    // Laser is rendered as cross-shaped beam
-    let laserVerts = [
-      // X    Y   Z    U    V
-      0.0, lr, 0.0, 0.0, 1.0,
-      0.0, lr, -ll, 0.0, 0.0,
-      0.0, -lr, 0.0, 1.0, 1.0,
-      0.0, -lr, -ll, 1.0, 0.0,
-
-      lr, 0.0, 0.0, 0.0, 1.0,
-      lr, 0.0, -ll, 0.0, 0.0,
-      -lr, 0.0, 0.0, 1.0, 1.0,
-      -lr, 0.0, -ll, 1.0, 0.0,
-
-      0.0, -lr, 0.0, 0.0, 1.0,
-      0.0, -lr, -ll, 0.0, 0.0,
-      0.0, lr, 0.0, 1.0, 1.0,
-      0.0, lr, -ll, 1.0, 0.0,
-
-      -lr, 0.0, 0.0, 0.0, 1.0,
-      -lr, 0.0, -ll, 0.0, 0.0,
-      lr, 0.0, 0.0, 1.0, 1.0,
-      lr, 0.0, -ll, 1.0, 0.0,
-    ];
-    let laserIndices = [
-      0, 1, 2, 1, 3, 2,
-      4, 5, 6, 5, 7, 6,
-      8, 9, 10, 9, 11, 10,
-      12, 13, 14, 13, 15, 14,
-    ];
+    let laserVerts = [// X    Y   Z    U    V
+    0.0, lr, 0.0, 0.0, 1.0, 0.0, lr, -ll, 0.0, 0.0, 0.0, -lr, 0.0, 1.0, 1.0, 0.0, -lr, -ll, 1.0, 0.0, lr, 0.0, 0.0, 0.0, 1.0, lr, 0.0, -ll, 0.0, 0.0, -lr, 0.0, 0.0, 1.0, 1.0, -lr, 0.0, -ll, 1.0, 0.0, 0.0, -lr, 0.0, 0.0, 1.0, 0.0, -lr, -ll, 0.0, 0.0, 0.0, lr, 0.0, 1.0, 1.0, 0.0, lr, -ll, 1.0, 0.0, -lr, 0.0, 0.0, 0.0, 1.0, -lr, 0.0, -ll, 0.0, 0.0, lr, 0.0, 0.0, 1.0, 1.0, lr, 0.0, -ll, 1.0, 0.0];
+    let laserIndices = [0, 1, 2, 1, 3, 2, 4, 5, 6, 5, 7, 6, 8, 9, 10, 9, 11, 10, 12, 13, 14, 13, 15, 14];
 
     let laserVertexBuffer = this._renderer.createRenderBuffer(gl.ARRAY_BUFFER, new Float32Array(laserVerts));
+
     let laserIndexBuffer = this._renderer.createRenderBuffer(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(laserIndices));
 
     let laserIndexCount = laserIndices.length;
-
-    let laserAttribs = [
-      new PrimitiveAttribute('POSITION', laserVertexBuffer, 3, gl.FLOAT, 20, 0),
-      new PrimitiveAttribute('TEXCOORD_0', laserVertexBuffer, 2, gl.FLOAT, 20, 12),
-    ];
-
+    let laserAttribs = [new PrimitiveAttribute('POSITION', laserVertexBuffer, 3, gl.FLOAT, 20, 0), new PrimitiveAttribute('TEXCOORD_0', laserVertexBuffer, 2, gl.FLOAT, 20, 12)];
     let laserPrimitive = new Primitive(laserAttribs, laserIndexCount);
     laserPrimitive.setIndexBuffer(laserIndexBuffer);
-
     let laserMaterial = new LaserMaterial();
 
     let laserRenderPrimitive = this._renderer.createRenderPrimitive(laserPrimitive, laserMaterial);
+
     let meshNode = new Node();
     meshNode.addRenderPrimitive(laserRenderPrimitive);
     return meshNode;
   }
 
   _createCursorMesh() {
-    let gl = this._renderer._gl;
-
-    // Cursor is a circular white dot with a dark "shadow" skirt around the edge
+    let gl = this._renderer._gl; // Cursor is a circular white dot with a dark "shadow" skirt around the edge
     // that fades from black to transparent as it moves out from the center.
     // Cursor verts are packed as [X, Y, Luminance, Opacity]
+
     let cursorVerts = [];
     let cursorIndices = [];
+    let segRad = 2.0 * Math.PI / CURSOR_SEGMENTS; // Cursor center
 
-    let segRad = (2.0 * Math.PI) / CURSOR_SEGMENTS;
-
-    // Cursor center
     for (let i = 0; i < CURSOR_SEGMENTS; ++i) {
       let rad = i * segRad;
       let x = Math.cos(rad);
@@ -430,52 +394,47 @@ export class InputRenderer extends Node {
       }
     }
 
-    let indexOffset = CURSOR_SEGMENTS;
+    let indexOffset = CURSOR_SEGMENTS; // Cursor Skirt
 
-    // Cursor Skirt
     for (let i = 0; i < CURSOR_SEGMENTS; ++i) {
       let rad = i * segRad;
       let x = Math.cos(rad);
       let y = Math.sin(rad);
-      cursorVerts.push(x * CURSOR_RADIUS, y * CURSOR_RADIUS,
-        CURSOR_SHADOW_INNER_LUMINANCE, CURSOR_SHADOW_INNER_OPACITY);
-      cursorVerts.push(x * CURSOR_SHADOW_RADIUS, y * CURSOR_SHADOW_RADIUS,
-        CURSOR_SHADOW_OUTER_LUMINANCE, CURSOR_SHADOW_OUTER_OPACITY);
+      cursorVerts.push(x * CURSOR_RADIUS, y * CURSOR_RADIUS, CURSOR_SHADOW_INNER_LUMINANCE, CURSOR_SHADOW_INNER_OPACITY);
+      cursorVerts.push(x * CURSOR_SHADOW_RADIUS, y * CURSOR_SHADOW_RADIUS, CURSOR_SHADOW_OUTER_LUMINANCE, CURSOR_SHADOW_OUTER_OPACITY);
 
       if (i > 0) {
-        let idx = indexOffset + (i * 2);
+        let idx = indexOffset + i * 2;
         cursorIndices.push(idx - 2, idx - 1, idx);
         cursorIndices.push(idx - 1, idx + 1, idx);
       }
     }
 
-    let idx = indexOffset + (CURSOR_SEGMENTS * 2);
+    let idx = indexOffset + CURSOR_SEGMENTS * 2;
     cursorIndices.push(idx - 2, idx - 1, indexOffset);
     cursorIndices.push(idx - 1, indexOffset + 1, indexOffset);
 
     let cursorVertexBuffer = this._renderer.createRenderBuffer(gl.ARRAY_BUFFER, new Float32Array(cursorVerts));
+
     let cursorIndexBuffer = this._renderer.createRenderBuffer(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cursorIndices));
 
     let cursorIndexCount = cursorIndices.length;
-
-    let cursorAttribs = [
-      new PrimitiveAttribute('POSITION', cursorVertexBuffer, 4, gl.FLOAT, 16, 0),
-    ];
-
+    let cursorAttribs = [new PrimitiveAttribute('POSITION', cursorVertexBuffer, 4, gl.FLOAT, 16, 0)];
     let cursorPrimitive = new Primitive(cursorAttribs, cursorIndexCount);
     cursorPrimitive.setIndexBuffer(cursorIndexBuffer);
-
     let cursorMaterial = new CursorMaterial();
-    let cursorHiddenMaterial = new CursorHiddenMaterial();
-
-    // Cursor renders two parts: The bright opaque cursor for areas where it's
+    let cursorHiddenMaterial = new CursorHiddenMaterial(); // Cursor renders two parts: The bright opaque cursor for areas where it's
     // not obscured and a more transparent, darker version for areas where it's
     // behind another object.
+
     let cursorRenderPrimitive = this._renderer.createRenderPrimitive(cursorPrimitive, cursorMaterial);
+
     let cursorHiddenRenderPrimitive = this._renderer.createRenderPrimitive(cursorPrimitive, cursorHiddenMaterial);
+
     let meshNode = new Node();
     meshNode.addRenderPrimitive(cursorRenderPrimitive);
     meshNode.addRenderPrimitive(cursorHiddenRenderPrimitive);
     return meshNode;
   }
+
 }

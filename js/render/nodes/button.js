@@ -6,10 +6,8 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -17,11 +15,9 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
 import { Material } from "../core/material.js";
 import { Node } from "../core/node.js";
 import { PrimitiveStream } from "../geometry/primitive-stream.js";
-
 const BUTTON_SIZE = 0.1;
 const BUTTON_CORNER_RADIUS = 0.025;
 const BUTTON_CORNER_SEGMENTS = 8;
@@ -37,9 +33,7 @@ const BUTTON_HOVER_TRANSITION_TIME_MS = 200;
 class ButtonMaterial extends Material {
   constructor() {
     super();
-
     this.state.blend = true;
-
     this.defineUniform("hoverAmount", 0);
   }
 
@@ -72,14 +66,13 @@ class ButtonMaterial extends Material {
       return mix(default_color, hover_color, hoverAmount);
     }`;
   }
+
 }
 
 class ButtonIconMaterial extends Material {
   constructor() {
     super();
-
     this.state.blend = true;
-
     this.defineUniform("hoverAmount", 0);
     this.icon = this.defineSampler("icon");
   }
@@ -114,15 +107,14 @@ class ButtonIconMaterial extends Material {
       return texture2D(icon, vTexCoord);
     }`;
   }
+
 }
 
 export class ButtonNode extends Node {
   constructor(iconTexture, callback) {
-    super();
+    super(); // All buttons are selectable by default.
 
-    // All buttons are selectable by default.
     this.selectable = true;
-
     this._selectHandler = callback;
     this._iconTexture = iconTexture;
     this._hovered = false;
@@ -144,34 +136,36 @@ export class ButtonNode extends Node {
 
   onRendererChanged(renderer) {
     let stream = new PrimitiveStream();
+    let hd = BUTTON_LAYER_DISTANCE * 0.5; // Build a rounded rect for the background.
 
-    let hd = BUTTON_LAYER_DISTANCE * 0.5;
-
-    // Build a rounded rect for the background.
     let hs = BUTTON_SIZE * 0.5;
     let ihs = hs - BUTTON_CORNER_RADIUS;
-    stream.startGeometry();
+    stream.startGeometry(); // Rounded corners and sides
 
-    // Rounded corners and sides
     let segments = BUTTON_CORNER_SEGMENTS * 4;
+
     for (let i = 0; i < segments; ++i) {
-      let rad = i * ((Math.PI * 2.0) / segments);
+      let rad = i * (Math.PI * 2.0 / segments);
       let x = Math.cos(rad) * BUTTON_CORNER_RADIUS;
       let y = Math.sin(rad) * BUTTON_CORNER_RADIUS;
       let section = Math.floor(i / BUTTON_CORNER_SEGMENTS);
+
       switch (section) {
         case 0:
           x += ihs;
           y += ihs;
           break;
+
         case 1:
           x -= ihs;
           y += ihs;
           break;
+
         case 2:
           x -= ihs;
           y -= ihs;
           break;
+
         case 3:
           x += ihs;
           y -= ihs;
@@ -186,36 +180,24 @@ export class ButtonNode extends Node {
     }
 
     stream.endGeometry();
-
     let buttonPrimitive = stream.finishPrimitive(renderer);
-    this._buttonRenderPrimitive = renderer.createRenderPrimitive(
-      buttonPrimitive,
-      new ButtonMaterial()
-    );
-    this.addRenderPrimitive(this._buttonRenderPrimitive);
+    this._buttonRenderPrimitive = renderer.createRenderPrimitive(buttonPrimitive, new ButtonMaterial());
+    this.addRenderPrimitive(this._buttonRenderPrimitive); // Build a simple textured quad for the foreground.
 
-    // Build a simple textured quad for the foreground.
     hs = BUTTON_ICON_SIZE * 0.5;
     stream.clear();
     stream.startGeometry();
-
     stream.pushVertex(-hs, hs, hd, 0, 0, 0, 0, 1);
     stream.pushVertex(-hs, -hs, hd, 0, 1, 0, 0, 1);
     stream.pushVertex(hs, -hs, hd, 1, 1, 0, 0, 1);
     stream.pushVertex(hs, hs, hd, 1, 0, 0, 0, 1);
-
     stream.pushTriangle(0, 1, 2);
     stream.pushTriangle(0, 2, 3);
-
     stream.endGeometry();
-
     let iconPrimitive = stream.finishPrimitive(renderer);
     let iconMaterial = new ButtonIconMaterial();
     iconMaterial.icon.texture = this._iconTexture;
-    this._iconRenderPrimitive = renderer.createRenderPrimitive(
-      iconPrimitive,
-      iconMaterial
-    );
+    this._iconRenderPrimitive = renderer.createRenderPrimitive(iconPrimitive, iconMaterial);
     this.addRenderPrimitive(this._iconRenderPrimitive);
   }
 
@@ -228,25 +210,24 @@ export class ButtonNode extends Node {
   }
 
   _updateHoverState() {
-    let t = this._hoverT / BUTTON_HOVER_TRANSITION_TIME_MS;
-    // Cubic Ease In/Out
+    let t = this._hoverT / BUTTON_HOVER_TRANSITION_TIME_MS; // Cubic Ease In/Out
     // TODO: Get a better animation system
-    let hoverAmount =
-      t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+
+    let hoverAmount = t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
     this._buttonRenderPrimitive.uniforms.hoverAmount.value = hoverAmount;
     this._iconRenderPrimitive.uniforms.hoverAmount.value = hoverAmount;
   }
 
   onUpdate(timestamp, frameDelta) {
     if (this._hovered && this._hoverT < BUTTON_HOVER_TRANSITION_TIME_MS) {
-      this._hoverT = Math.min(
-        BUTTON_HOVER_TRANSITION_TIME_MS,
-        this._hoverT + frameDelta
-      );
+      this._hoverT = Math.min(BUTTON_HOVER_TRANSITION_TIME_MS, this._hoverT + frameDelta);
+
       this._updateHoverState();
     } else if (!this._hovered && this._hoverT > 0) {
       this._hoverT = Math.max(0.0, this._hoverT - frameDelta);
+
       this._updateHoverState();
     }
   }
+
 }

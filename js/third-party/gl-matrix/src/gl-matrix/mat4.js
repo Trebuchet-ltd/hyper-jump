@@ -1,5 +1,4 @@
 import * as glMatrix from "./common.js";
-
 /**
  * 4x4 Matrix<br>Format: column-major, when typed out it looks like row-major<br>The matrices are being post multiplied.
  * @module mat4
@@ -10,8 +9,10 @@ import * as glMatrix from "./common.js";
  *
  * @returns {mat4} a new 4x4 matrix
  */
+
 export function create() {
   let out = new glMatrix.ARRAY_TYPE(16);
+
   if (glMatrix.ARRAY_TYPE != Float32Array) {
     out[1] = 0;
     out[2] = 0;
@@ -26,19 +27,20 @@ export function create() {
     out[13] = 0;
     out[14] = 0;
   }
+
   out[0] = 1;
   out[5] = 1;
   out[10] = 1;
   out[15] = 1;
   return out;
 }
-
 /**
  * Creates a new mat4 initialized with values from an existing matrix
  *
  * @param {mat4} a matrix to clone
  * @returns {mat4} a new 4x4 matrix
  */
+
 export function clone(a) {
   let out = new glMatrix.ARRAY_TYPE(16);
   out[0] = a[0];
@@ -59,7 +61,6 @@ export function clone(a) {
   out[15] = a[15];
   return out;
 }
-
 /**
  * Copy the values from one mat4 to another
  *
@@ -67,6 +68,7 @@ export function clone(a) {
  * @param {mat4} a the source matrix
  * @returns {mat4} out
  */
+
 export function copy(out, a) {
   out[0] = a[0];
   out[1] = a[1];
@@ -86,7 +88,6 @@ export function copy(out, a) {
   out[15] = a[15];
   return out;
 }
-
 /**
  * Create a new mat4 with the given values
  *
@@ -108,24 +109,8 @@ export function copy(out, a) {
  * @param {Number} m33 Component in column 3, row 3 position (index 15)
  * @returns {mat4} A new mat4
  */
-export function fromValues(
-  m00,
-  m01,
-  m02,
-  m03,
-  m10,
-  m11,
-  m12,
-  m13,
-  m20,
-  m21,
-  m22,
-  m23,
-  m30,
-  m31,
-  m32,
-  m33
-) {
+
+export function fromValues(m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33) {
   let out = new glMatrix.ARRAY_TYPE(16);
   out[0] = m00;
   out[1] = m01;
@@ -145,7 +130,6 @@ export function fromValues(
   out[15] = m33;
   return out;
 }
-
 /**
  * Set the components of a mat4 to the given values
  *
@@ -168,25 +152,8 @@ export function fromValues(
  * @param {Number} m33 Component in column 3, row 3 position (index 15)
  * @returns {mat4} out
  */
-export function set(
-  out,
-  m00,
-  m01,
-  m02,
-  m03,
-  m10,
-  m11,
-  m12,
-  m13,
-  m20,
-  m21,
-  m22,
-  m23,
-  m30,
-  m31,
-  m32,
-  m33
-) {
+
+export function set(out, m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33) {
   out[0] = m00;
   out[1] = m01;
   out[2] = m02;
@@ -205,13 +172,13 @@ export function set(
   out[15] = m33;
   return out;
 }
-
 /**
  * Set a mat4 to the identity matrix
  *
  * @param {mat4} out the receiving matrix
  * @returns {mat4} out
  */
+
 export function identity(out) {
   out[0] = 1;
   out[1] = 0;
@@ -231,7 +198,6 @@ export function identity(out) {
   out[15] = 1;
   return out;
 }
-
 /**
  * Transpose the values of a mat4
  *
@@ -239,16 +205,16 @@ export function identity(out) {
  * @param {mat4} a the source matrix
  * @returns {mat4} out
  */
+
 export function transpose(out, a) {
   // If we are transposing ourselves we can skip a few steps but have to cache some values
   if (out === a) {
     let a01 = a[1],
-      a02 = a[2],
-      a03 = a[3];
+        a02 = a[2],
+        a03 = a[3];
     let a12 = a[6],
-      a13 = a[7];
+        a13 = a[7];
     let a23 = a[11];
-
     out[1] = a[4];
     out[2] = a[8];
     out[3] = a[12];
@@ -282,7 +248,6 @@ export function transpose(out, a) {
 
   return out;
 }
-
 /**
  * Inverts a mat4
  *
@@ -290,24 +255,24 @@ export function transpose(out, a) {
  * @param {mat4} a the source matrix
  * @returns {mat4} out
  */
+
 export function invert(out, a) {
   let a00 = a[0],
-    a01 = a[1],
-    a02 = a[2],
-    a03 = a[3];
+      a01 = a[1],
+      a02 = a[2],
+      a03 = a[3];
   let a10 = a[4],
-    a11 = a[5],
-    a12 = a[6],
-    a13 = a[7];
+      a11 = a[5],
+      a12 = a[6],
+      a13 = a[7];
   let a20 = a[8],
-    a21 = a[9],
-    a22 = a[10],
-    a23 = a[11];
+      a21 = a[9],
+      a22 = a[10],
+      a23 = a[11];
   let a30 = a[12],
-    a31 = a[13],
-    a32 = a[14],
-    a33 = a[15];
-
+      a31 = a[13],
+      a32 = a[14],
+      a33 = a[15];
   let b00 = a00 * a11 - a01 * a10;
   let b01 = a00 * a12 - a02 * a10;
   let b02 = a00 * a13 - a03 * a10;
@@ -319,17 +284,15 @@ export function invert(out, a) {
   let b08 = a20 * a33 - a23 * a30;
   let b09 = a21 * a32 - a22 * a31;
   let b10 = a21 * a33 - a23 * a31;
-  let b11 = a22 * a33 - a23 * a32;
+  let b11 = a22 * a33 - a23 * a32; // Calculate the determinant
 
-  // Calculate the determinant
-  let det =
-    b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
+  let det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
 
   if (!det) {
     return null;
   }
-  det = 1.0 / det;
 
+  det = 1.0 / det;
   out[0] = (a11 * b11 - a12 * b10 + a13 * b09) * det;
   out[1] = (a02 * b10 - a01 * b11 - a03 * b09) * det;
   out[2] = (a31 * b05 - a32 * b04 + a33 * b03) * det;
@@ -346,10 +309,8 @@ export function invert(out, a) {
   out[13] = (a00 * b09 - a01 * b07 + a02 * b06) * det;
   out[14] = (a31 * b01 - a30 * b03 - a32 * b00) * det;
   out[15] = (a20 * b03 - a21 * b01 + a22 * b00) * det;
-
   return out;
 }
-
 /**
  * Calculates the adjugate of a mat4
  *
@@ -357,123 +318,66 @@ export function invert(out, a) {
  * @param {mat4} a the source matrix
  * @returns {mat4} out
  */
+
 export function adjoint(out, a) {
   let a00 = a[0],
-    a01 = a[1],
-    a02 = a[2],
-    a03 = a[3];
+      a01 = a[1],
+      a02 = a[2],
+      a03 = a[3];
   let a10 = a[4],
-    a11 = a[5],
-    a12 = a[6],
-    a13 = a[7];
+      a11 = a[5],
+      a12 = a[6],
+      a13 = a[7];
   let a20 = a[8],
-    a21 = a[9],
-    a22 = a[10],
-    a23 = a[11];
+      a21 = a[9],
+      a22 = a[10],
+      a23 = a[11];
   let a30 = a[12],
-    a31 = a[13],
-    a32 = a[14],
-    a33 = a[15];
-
-  out[0] =
-    a11 * (a22 * a33 - a23 * a32) -
-    a21 * (a12 * a33 - a13 * a32) +
-    a31 * (a12 * a23 - a13 * a22);
-  out[1] = -(
-    a01 * (a22 * a33 - a23 * a32) -
-    a21 * (a02 * a33 - a03 * a32) +
-    a31 * (a02 * a23 - a03 * a22)
-  );
-  out[2] =
-    a01 * (a12 * a33 - a13 * a32) -
-    a11 * (a02 * a33 - a03 * a32) +
-    a31 * (a02 * a13 - a03 * a12);
-  out[3] = -(
-    a01 * (a12 * a23 - a13 * a22) -
-    a11 * (a02 * a23 - a03 * a22) +
-    a21 * (a02 * a13 - a03 * a12)
-  );
-  out[4] = -(
-    a10 * (a22 * a33 - a23 * a32) -
-    a20 * (a12 * a33 - a13 * a32) +
-    a30 * (a12 * a23 - a13 * a22)
-  );
-  out[5] =
-    a00 * (a22 * a33 - a23 * a32) -
-    a20 * (a02 * a33 - a03 * a32) +
-    a30 * (a02 * a23 - a03 * a22);
-  out[6] = -(
-    a00 * (a12 * a33 - a13 * a32) -
-    a10 * (a02 * a33 - a03 * a32) +
-    a30 * (a02 * a13 - a03 * a12)
-  );
-  out[7] =
-    a00 * (a12 * a23 - a13 * a22) -
-    a10 * (a02 * a23 - a03 * a22) +
-    a20 * (a02 * a13 - a03 * a12);
-  out[8] =
-    a10 * (a21 * a33 - a23 * a31) -
-    a20 * (a11 * a33 - a13 * a31) +
-    a30 * (a11 * a23 - a13 * a21);
-  out[9] = -(
-    a00 * (a21 * a33 - a23 * a31) -
-    a20 * (a01 * a33 - a03 * a31) +
-    a30 * (a01 * a23 - a03 * a21)
-  );
-  out[10] =
-    a00 * (a11 * a33 - a13 * a31) -
-    a10 * (a01 * a33 - a03 * a31) +
-    a30 * (a01 * a13 - a03 * a11);
-  out[11] = -(
-    a00 * (a11 * a23 - a13 * a21) -
-    a10 * (a01 * a23 - a03 * a21) +
-    a20 * (a01 * a13 - a03 * a11)
-  );
-  out[12] = -(
-    a10 * (a21 * a32 - a22 * a31) -
-    a20 * (a11 * a32 - a12 * a31) +
-    a30 * (a11 * a22 - a12 * a21)
-  );
-  out[13] =
-    a00 * (a21 * a32 - a22 * a31) -
-    a20 * (a01 * a32 - a02 * a31) +
-    a30 * (a01 * a22 - a02 * a21);
-  out[14] = -(
-    a00 * (a11 * a32 - a12 * a31) -
-    a10 * (a01 * a32 - a02 * a31) +
-    a30 * (a01 * a12 - a02 * a11)
-  );
-  out[15] =
-    a00 * (a11 * a22 - a12 * a21) -
-    a10 * (a01 * a22 - a02 * a21) +
-    a20 * (a01 * a12 - a02 * a11);
+      a31 = a[13],
+      a32 = a[14],
+      a33 = a[15];
+  out[0] = a11 * (a22 * a33 - a23 * a32) - a21 * (a12 * a33 - a13 * a32) + a31 * (a12 * a23 - a13 * a22);
+  out[1] = -(a01 * (a22 * a33 - a23 * a32) - a21 * (a02 * a33 - a03 * a32) + a31 * (a02 * a23 - a03 * a22));
+  out[2] = a01 * (a12 * a33 - a13 * a32) - a11 * (a02 * a33 - a03 * a32) + a31 * (a02 * a13 - a03 * a12);
+  out[3] = -(a01 * (a12 * a23 - a13 * a22) - a11 * (a02 * a23 - a03 * a22) + a21 * (a02 * a13 - a03 * a12));
+  out[4] = -(a10 * (a22 * a33 - a23 * a32) - a20 * (a12 * a33 - a13 * a32) + a30 * (a12 * a23 - a13 * a22));
+  out[5] = a00 * (a22 * a33 - a23 * a32) - a20 * (a02 * a33 - a03 * a32) + a30 * (a02 * a23 - a03 * a22);
+  out[6] = -(a00 * (a12 * a33 - a13 * a32) - a10 * (a02 * a33 - a03 * a32) + a30 * (a02 * a13 - a03 * a12));
+  out[7] = a00 * (a12 * a23 - a13 * a22) - a10 * (a02 * a23 - a03 * a22) + a20 * (a02 * a13 - a03 * a12);
+  out[8] = a10 * (a21 * a33 - a23 * a31) - a20 * (a11 * a33 - a13 * a31) + a30 * (a11 * a23 - a13 * a21);
+  out[9] = -(a00 * (a21 * a33 - a23 * a31) - a20 * (a01 * a33 - a03 * a31) + a30 * (a01 * a23 - a03 * a21));
+  out[10] = a00 * (a11 * a33 - a13 * a31) - a10 * (a01 * a33 - a03 * a31) + a30 * (a01 * a13 - a03 * a11);
+  out[11] = -(a00 * (a11 * a23 - a13 * a21) - a10 * (a01 * a23 - a03 * a21) + a20 * (a01 * a13 - a03 * a11));
+  out[12] = -(a10 * (a21 * a32 - a22 * a31) - a20 * (a11 * a32 - a12 * a31) + a30 * (a11 * a22 - a12 * a21));
+  out[13] = a00 * (a21 * a32 - a22 * a31) - a20 * (a01 * a32 - a02 * a31) + a30 * (a01 * a22 - a02 * a21);
+  out[14] = -(a00 * (a11 * a32 - a12 * a31) - a10 * (a01 * a32 - a02 * a31) + a30 * (a01 * a12 - a02 * a11));
+  out[15] = a00 * (a11 * a22 - a12 * a21) - a10 * (a01 * a22 - a02 * a21) + a20 * (a01 * a12 - a02 * a11);
   return out;
 }
-
 /**
  * Calculates the determinant of a mat4
  *
  * @param {mat4} a the source matrix
  * @returns {Number} determinant of a
  */
+
 export function determinant(a) {
   let a00 = a[0],
-    a01 = a[1],
-    a02 = a[2],
-    a03 = a[3];
+      a01 = a[1],
+      a02 = a[2],
+      a03 = a[3];
   let a10 = a[4],
-    a11 = a[5],
-    a12 = a[6],
-    a13 = a[7];
+      a11 = a[5],
+      a12 = a[6],
+      a13 = a[7];
   let a20 = a[8],
-    a21 = a[9],
-    a22 = a[10],
-    a23 = a[11];
+      a21 = a[9],
+      a22 = a[10],
+      a23 = a[11];
   let a30 = a[12],
-    a31 = a[13],
-    a32 = a[14],
-    a33 = a[15];
-
+      a31 = a[13],
+      a32 = a[14],
+      a33 = a[15];
   let b00 = a00 * a11 - a01 * a10;
   let b01 = a00 * a12 - a02 * a10;
   let b02 = a00 * a13 - a03 * a10;
@@ -485,12 +389,10 @@ export function determinant(a) {
   let b08 = a20 * a33 - a23 * a30;
   let b09 = a21 * a32 - a22 * a31;
   let b10 = a21 * a33 - a23 * a31;
-  let b11 = a22 * a33 - a23 * a32;
+  let b11 = a22 * a33 - a23 * a32; // Calculate the determinant
 
-  // Calculate the determinant
   return b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
 }
-
 /**
  * Multiplies two mat4s
  *
@@ -499,34 +401,33 @@ export function determinant(a) {
  * @param {mat4} b the second operand
  * @returns {mat4} out
  */
+
 export function multiply(out, a, b) {
   let a00 = a[0],
-    a01 = a[1],
-    a02 = a[2],
-    a03 = a[3];
+      a01 = a[1],
+      a02 = a[2],
+      a03 = a[3];
   let a10 = a[4],
-    a11 = a[5],
-    a12 = a[6],
-    a13 = a[7];
+      a11 = a[5],
+      a12 = a[6],
+      a13 = a[7];
   let a20 = a[8],
-    a21 = a[9],
-    a22 = a[10],
-    a23 = a[11];
+      a21 = a[9],
+      a22 = a[10],
+      a23 = a[11];
   let a30 = a[12],
-    a31 = a[13],
-    a32 = a[14],
-    a33 = a[15];
+      a31 = a[13],
+      a32 = a[14],
+      a33 = a[15]; // Cache only the current line of the second matrix
 
-  // Cache only the current line of the second matrix
   let b0 = b[0],
-    b1 = b[1],
-    b2 = b[2],
-    b3 = b[3];
+      b1 = b[1],
+      b2 = b[2],
+      b3 = b[3];
   out[0] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
   out[1] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
   out[2] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
   out[3] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-
   b0 = b[4];
   b1 = b[5];
   b2 = b[6];
@@ -535,7 +436,6 @@ export function multiply(out, a, b) {
   out[5] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
   out[6] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
   out[7] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-
   b0 = b[8];
   b1 = b[9];
   b2 = b[10];
@@ -544,7 +444,6 @@ export function multiply(out, a, b) {
   out[9] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
   out[10] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
   out[11] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-
   b0 = b[12];
   b1 = b[13];
   b2 = b[14];
@@ -555,7 +454,6 @@ export function multiply(out, a, b) {
   out[15] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
   return out;
 }
-
 /**
  * Translate a mat4 by the given vector
  *
@@ -564,10 +462,11 @@ export function multiply(out, a, b) {
  * @param {vec3} v vector to translate by
  * @returns {mat4} out
  */
+
 export function translate(out, a, v) {
   let x = v[0],
-    y = v[1],
-    z = v[2];
+      y = v[1],
+      z = v[2];
   let a00, a01, a02, a03;
   let a10, a11, a12, a13;
   let a20, a21, a22, a23;
@@ -590,7 +489,6 @@ export function translate(out, a, v) {
     a21 = a[9];
     a22 = a[10];
     a23 = a[11];
-
     out[0] = a00;
     out[1] = a01;
     out[2] = a02;
@@ -603,7 +501,6 @@ export function translate(out, a, v) {
     out[9] = a21;
     out[10] = a22;
     out[11] = a23;
-
     out[12] = a00 * x + a10 * y + a20 * z + a[12];
     out[13] = a01 * x + a11 * y + a21 * z + a[13];
     out[14] = a02 * x + a12 * y + a22 * z + a[14];
@@ -612,7 +509,6 @@ export function translate(out, a, v) {
 
   return out;
 }
-
 /**
  * Scales the mat4 by the dimensions in the given vec3 not using vectorization
  *
@@ -621,11 +517,11 @@ export function translate(out, a, v) {
  * @param {vec3} v the vec3 to scale the matrix by
  * @returns {mat4} out
  **/
+
 export function scale(out, a, v) {
   let x = v[0],
-    y = v[1],
-    z = v[2];
-
+      y = v[1],
+      z = v[2];
   out[0] = a[0] * x;
   out[1] = a[1] * x;
   out[2] = a[2] * x;
@@ -644,7 +540,6 @@ export function scale(out, a, v) {
   out[15] = a[15];
   return out;
 }
-
 /**
  * Rotates a mat4 by the given angle around the given axis
  *
@@ -654,10 +549,11 @@ export function scale(out, a, v) {
  * @param {vec3} axis the axis to rotate around
  * @returns {mat4} out
  */
+
 export function rotate(out, a, rad, axis) {
   let x = axis[0],
-    y = axis[1],
-    z = axis[2];
+      y = axis[1],
+      z = axis[2];
   let len = Math.sqrt(x * x + y * y + z * z);
   let s, c, t;
   let a00, a01, a02, a03;
@@ -675,11 +571,9 @@ export function rotate(out, a, rad, axis) {
   x *= len;
   y *= len;
   z *= len;
-
   s = Math.sin(rad);
   c = Math.cos(rad);
   t = 1 - c;
-
   a00 = a[0];
   a01 = a[1];
   a02 = a[2];
@@ -691,9 +585,8 @@ export function rotate(out, a, rad, axis) {
   a20 = a[8];
   a21 = a[9];
   a22 = a[10];
-  a23 = a[11];
+  a23 = a[11]; // Construct the elements of the rotation matrix
 
-  // Construct the elements of the rotation matrix
   b00 = x * x * t + c;
   b01 = y * x * t + z * s;
   b02 = z * x * t - y * s;
@@ -702,9 +595,8 @@ export function rotate(out, a, rad, axis) {
   b12 = z * y * t + x * s;
   b20 = x * z * t + y * s;
   b21 = y * z * t - x * s;
-  b22 = z * z * t + c;
+  b22 = z * z * t + c; // Perform rotation-specific matrix multiplication
 
-  // Perform rotation-specific matrix multiplication
   out[0] = a00 * b00 + a10 * b01 + a20 * b02;
   out[1] = a01 * b00 + a11 * b01 + a21 * b02;
   out[2] = a02 * b00 + a12 * b01 + a22 * b02;
@@ -725,9 +617,9 @@ export function rotate(out, a, rad, axis) {
     out[14] = a[14];
     out[15] = a[15];
   }
+
   return out;
 }
-
 /**
  * Rotates a matrix by the given angle around the X axis
  *
@@ -736,6 +628,7 @@ export function rotate(out, a, rad, axis) {
  * @param {Number} rad the angle to rotate the matrix by
  * @returns {mat4} out
  */
+
 export function rotateX(out, a, rad) {
   let s = Math.sin(rad);
   let c = Math.cos(rad);
@@ -758,9 +651,9 @@ export function rotateX(out, a, rad) {
     out[13] = a[13];
     out[14] = a[14];
     out[15] = a[15];
-  }
+  } // Perform axis-specific matrix multiplication
 
-  // Perform axis-specific matrix multiplication
+
   out[4] = a10 * c + a20 * s;
   out[5] = a11 * c + a21 * s;
   out[6] = a12 * c + a22 * s;
@@ -771,7 +664,6 @@ export function rotateX(out, a, rad) {
   out[11] = a23 * c - a13 * s;
   return out;
 }
-
 /**
  * Rotates a matrix by the given angle around the Y axis
  *
@@ -780,6 +672,7 @@ export function rotateX(out, a, rad) {
  * @param {Number} rad the angle to rotate the matrix by
  * @returns {mat4} out
  */
+
 export function rotateY(out, a, rad) {
   let s = Math.sin(rad);
   let c = Math.cos(rad);
@@ -802,9 +695,9 @@ export function rotateY(out, a, rad) {
     out[13] = a[13];
     out[14] = a[14];
     out[15] = a[15];
-  }
+  } // Perform axis-specific matrix multiplication
 
-  // Perform axis-specific matrix multiplication
+
   out[0] = a00 * c - a20 * s;
   out[1] = a01 * c - a21 * s;
   out[2] = a02 * c - a22 * s;
@@ -815,7 +708,6 @@ export function rotateY(out, a, rad) {
   out[11] = a03 * s + a23 * c;
   return out;
 }
-
 /**
  * Rotates a matrix by the given angle around the Z axis
  *
@@ -824,6 +716,7 @@ export function rotateY(out, a, rad) {
  * @param {Number} rad the angle to rotate the matrix by
  * @returns {mat4} out
  */
+
 export function rotateZ(out, a, rad) {
   let s = Math.sin(rad);
   let c = Math.cos(rad);
@@ -846,9 +739,9 @@ export function rotateZ(out, a, rad) {
     out[13] = a[13];
     out[14] = a[14];
     out[15] = a[15];
-  }
+  } // Perform axis-specific matrix multiplication
 
-  // Perform axis-specific matrix multiplication
+
   out[0] = a00 * c + a10 * s;
   out[1] = a01 * c + a11 * s;
   out[2] = a02 * c + a12 * s;
@@ -859,7 +752,6 @@ export function rotateZ(out, a, rad) {
   out[7] = a13 * c - a03 * s;
   return out;
 }
-
 /**
  * Creates a matrix from a vector translation
  * This is equivalent to (but much faster than):
@@ -871,6 +763,7 @@ export function rotateZ(out, a, rad) {
  * @param {vec3} v Translation vector
  * @returns {mat4} out
  */
+
 export function fromTranslation(out, v) {
   out[0] = 1;
   out[1] = 0;
@@ -890,7 +783,6 @@ export function fromTranslation(out, v) {
   out[15] = 1;
   return out;
 }
-
 /**
  * Creates a matrix from a vector scaling
  * This is equivalent to (but much faster than):
@@ -902,6 +794,7 @@ export function fromTranslation(out, v) {
  * @param {vec3} v Scaling vector
  * @returns {mat4} out
  */
+
 export function fromScaling(out, v) {
   out[0] = v[0];
   out[1] = 0;
@@ -921,7 +814,6 @@ export function fromScaling(out, v) {
   out[15] = 1;
   return out;
 }
-
 /**
  * Creates a matrix from a given angle around a given axis
  * This is equivalent to (but much faster than):
@@ -934,10 +826,11 @@ export function fromScaling(out, v) {
  * @param {vec3} axis the axis to rotate around
  * @returns {mat4} out
  */
+
 export function fromRotation(out, rad, axis) {
   let x = axis[0],
-    y = axis[1],
-    z = axis[2];
+      y = axis[1],
+      z = axis[2];
   let len = Math.sqrt(x * x + y * y + z * z);
   let s, c, t;
 
@@ -949,12 +842,10 @@ export function fromRotation(out, rad, axis) {
   x *= len;
   y *= len;
   z *= len;
-
   s = Math.sin(rad);
   c = Math.cos(rad);
-  t = 1 - c;
+  t = 1 - c; // Perform rotation-specific matrix multiplication
 
-  // Perform rotation-specific matrix multiplication
   out[0] = x * x * t + c;
   out[1] = y * x * t + z * s;
   out[2] = z * x * t - y * s;
@@ -973,7 +864,6 @@ export function fromRotation(out, rad, axis) {
   out[15] = 1;
   return out;
 }
-
 /**
  * Creates a matrix from the given angle around the X axis
  * This is equivalent to (but much faster than):
@@ -985,11 +875,11 @@ export function fromRotation(out, rad, axis) {
  * @param {Number} rad the angle to rotate the matrix by
  * @returns {mat4} out
  */
+
 export function fromXRotation(out, rad) {
   let s = Math.sin(rad);
-  let c = Math.cos(rad);
+  let c = Math.cos(rad); // Perform axis-specific matrix multiplication
 
-  // Perform axis-specific matrix multiplication
   out[0] = 1;
   out[1] = 0;
   out[2] = 0;
@@ -1008,7 +898,6 @@ export function fromXRotation(out, rad) {
   out[15] = 1;
   return out;
 }
-
 /**
  * Creates a matrix from the given angle around the Y axis
  * This is equivalent to (but much faster than):
@@ -1020,11 +909,11 @@ export function fromXRotation(out, rad) {
  * @param {Number} rad the angle to rotate the matrix by
  * @returns {mat4} out
  */
+
 export function fromYRotation(out, rad) {
   let s = Math.sin(rad);
-  let c = Math.cos(rad);
+  let c = Math.cos(rad); // Perform axis-specific matrix multiplication
 
-  // Perform axis-specific matrix multiplication
   out[0] = c;
   out[1] = 0;
   out[2] = -s;
@@ -1043,7 +932,6 @@ export function fromYRotation(out, rad) {
   out[15] = 1;
   return out;
 }
-
 /**
  * Creates a matrix from the given angle around the Z axis
  * This is equivalent to (but much faster than):
@@ -1055,11 +943,11 @@ export function fromYRotation(out, rad) {
  * @param {Number} rad the angle to rotate the matrix by
  * @returns {mat4} out
  */
+
 export function fromZRotation(out, rad) {
   let s = Math.sin(rad);
-  let c = Math.cos(rad);
+  let c = Math.cos(rad); // Perform axis-specific matrix multiplication
 
-  // Perform axis-specific matrix multiplication
   out[0] = c;
   out[1] = s;
   out[2] = 0;
@@ -1078,7 +966,6 @@ export function fromZRotation(out, rad) {
   out[15] = 1;
   return out;
 }
-
 /**
  * Creates a matrix from a quaternion rotation and vector translation
  * This is equivalent to (but much faster than):
@@ -1094,16 +981,16 @@ export function fromZRotation(out, rad) {
  * @param {vec3} v Translation vector
  * @returns {mat4} out
  */
+
 export function fromRotationTranslation(out, q, v) {
   // Quaternion math
   let x = q[0],
-    y = q[1],
-    z = q[2],
-    w = q[3];
+      y = q[1],
+      z = q[2],
+      w = q[3];
   let x2 = x + x;
   let y2 = y + y;
   let z2 = z + z;
-
   let xx = x * x2;
   let xy = x * y2;
   let xz = x * z2;
@@ -1113,7 +1000,6 @@ export function fromRotationTranslation(out, q, v) {
   let wx = w * x2;
   let wy = w * y2;
   let wz = w * z2;
-
   out[0] = 1 - (yy + zz);
   out[1] = xy + wz;
   out[2] = xz - wy;
@@ -1130,10 +1016,8 @@ export function fromRotationTranslation(out, q, v) {
   out[13] = v[1];
   out[14] = v[2];
   out[15] = 1;
-
   return out;
 }
-
 /**
  * Creates a new mat4 from a dual quat.
  *
@@ -1141,32 +1025,32 @@ export function fromRotationTranslation(out, q, v) {
  * @param {quat2} a Dual Quaternion
  * @returns {mat4} mat4 receiving operation result
  */
+
 export function fromQuat2(out, a) {
   let translation = new glMatrix.ARRAY_TYPE(3);
   let bx = -a[0],
-    by = -a[1],
-    bz = -a[2],
-    bw = a[3],
-    ax = a[4],
-    ay = a[5],
-    az = a[6],
-    aw = a[7];
+      by = -a[1],
+      bz = -a[2],
+      bw = a[3],
+      ax = a[4],
+      ay = a[5],
+      az = a[6],
+      aw = a[7];
+  let magnitude = bx * bx + by * by + bz * bz + bw * bw; //Only scale if it makes sense
 
-  let magnitude = bx * bx + by * by + bz * bz + bw * bw;
-  //Only scale if it makes sense
   if (magnitude > 0) {
-    translation[0] = ((ax * bw + aw * bx + ay * bz - az * by) * 2) / magnitude;
-    translation[1] = ((ay * bw + aw * by + az * bx - ax * bz) * 2) / magnitude;
-    translation[2] = ((az * bw + aw * bz + ax * by - ay * bx) * 2) / magnitude;
+    translation[0] = (ax * bw + aw * bx + ay * bz - az * by) * 2 / magnitude;
+    translation[1] = (ay * bw + aw * by + az * bx - ax * bz) * 2 / magnitude;
+    translation[2] = (az * bw + aw * bz + ax * by - ay * bx) * 2 / magnitude;
   } else {
     translation[0] = (ax * bw + aw * bx + ay * bz - az * by) * 2;
     translation[1] = (ay * bw + aw * by + az * bx - ax * bz) * 2;
     translation[2] = (az * bw + aw * bz + ax * by - ay * bx) * 2;
   }
+
   fromRotationTranslation(out, a, translation);
   return out;
 }
-
 /**
  * Returns the translation vector component of a transformation
  *  matrix. If a matrix is built with fromRotationTranslation,
@@ -1176,14 +1060,13 @@ export function fromQuat2(out, a) {
  * @param  {mat4} mat Matrix to be decomposed (input)
  * @return {vec3} out
  */
+
 export function getTranslation(out, mat) {
   out[0] = mat[12];
   out[1] = mat[13];
   out[2] = mat[14];
-
   return out;
 }
-
 /**
  * Returns the scaling factor component of a transformation
  *  matrix. If a matrix is built with fromRotationTranslationScale
@@ -1194,6 +1077,7 @@ export function getTranslation(out, mat) {
  * @param  {mat4} mat Matrix to be decomposed (input)
  * @return {vec3} out
  */
+
 export function getScaling(out, mat) {
   let m11 = mat[0];
   let m12 = mat[1];
@@ -1204,14 +1088,11 @@ export function getScaling(out, mat) {
   let m31 = mat[8];
   let m32 = mat[9];
   let m33 = mat[10];
-
   out[0] = Math.sqrt(m11 * m11 + m12 * m12 + m13 * m13);
   out[1] = Math.sqrt(m21 * m21 + m22 * m22 + m23 * m23);
   out[2] = Math.sqrt(m31 * m31 + m32 * m32 + m33 * m33);
-
   return out;
 }
-
 /**
  * Returns a quaternion representing the rotational component
  *  of a transformation matrix. If a matrix is built with
@@ -1221,6 +1102,7 @@ export function getScaling(out, mat) {
  * @param {mat4} mat Matrix to be decomposed (input)
  * @return {quat} out
  */
+
 export function getRotation(out, mat) {
   // Algorithm taken from http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
   let trace = mat[0] + mat[5] + mat[10];
@@ -1254,7 +1136,6 @@ export function getRotation(out, mat) {
 
   return out;
 }
-
 /**
  * Creates a matrix from a quaternion rotation, vector translation and vector scale
  * This is equivalent to (but much faster than):
@@ -1272,16 +1153,16 @@ export function getRotation(out, mat) {
  * @param {vec3} s Scaling vector
  * @returns {mat4} out
  */
+
 export function fromRotationTranslationScale(out, q, v, s) {
   // Quaternion math
   let x = q[0],
-    y = q[1],
-    z = q[2],
-    w = q[3];
+      y = q[1],
+      z = q[2],
+      w = q[3];
   let x2 = x + x;
   let y2 = y + y;
   let z2 = z + z;
-
   let xx = x * x2;
   let xy = x * y2;
   let xz = x * z2;
@@ -1294,7 +1175,6 @@ export function fromRotationTranslationScale(out, q, v, s) {
   let sx = s[0];
   let sy = s[1];
   let sz = s[2];
-
   out[0] = (1 - (yy + zz)) * sx;
   out[1] = (xy + wz) * sx;
   out[2] = (xz - wy) * sx;
@@ -1311,10 +1191,8 @@ export function fromRotationTranslationScale(out, q, v, s) {
   out[13] = v[1];
   out[14] = v[2];
   out[15] = 1;
-
   return out;
 }
-
 /**
  * Creates a matrix from a quaternion rotation, vector translation and vector scale, rotating and scaling around the given origin
  * This is equivalent to (but much faster than):
@@ -1335,16 +1213,16 @@ export function fromRotationTranslationScale(out, q, v, s) {
  * @param {vec3} o The origin vector around which to scale and rotate
  * @returns {mat4} out
  */
+
 export function fromRotationTranslationScaleOrigin(out, q, v, s, o) {
   // Quaternion math
   let x = q[0],
-    y = q[1],
-    z = q[2],
-    w = q[3];
+      y = q[1],
+      z = q[2],
+      w = q[3];
   let x2 = x + x;
   let y2 = y + y;
   let z2 = z + z;
-
   let xx = x * x2;
   let xy = x * y2;
   let xz = x * z2;
@@ -1354,15 +1232,12 @@ export function fromRotationTranslationScaleOrigin(out, q, v, s, o) {
   let wx = w * x2;
   let wy = w * y2;
   let wz = w * z2;
-
   let sx = s[0];
   let sy = s[1];
   let sz = s[2];
-
   let ox = o[0];
   let oy = o[1];
   let oz = o[2];
-
   let out0 = (1 - (yy + zz)) * sx;
   let out1 = (xy + wz) * sx;
   let out2 = (xz - wy) * sx;
@@ -1372,7 +1247,6 @@ export function fromRotationTranslationScaleOrigin(out, q, v, s, o) {
   let out8 = (xz + wy) * sz;
   let out9 = (yz - wx) * sz;
   let out10 = (1 - (xx + yy)) * sz;
-
   out[0] = out0;
   out[1] = out1;
   out[2] = out2;
@@ -1389,10 +1263,8 @@ export function fromRotationTranslationScaleOrigin(out, q, v, s, o) {
   out[13] = v[1] + oy - (out1 * ox + out5 * oy + out9 * oz);
   out[14] = v[2] + oz - (out2 * ox + out6 * oy + out10 * oz);
   out[15] = 1;
-
   return out;
 }
-
 /**
  * Calculates a 4x4 matrix from the given quaternion
  *
@@ -1401,15 +1273,15 @@ export function fromRotationTranslationScaleOrigin(out, q, v, s, o) {
  *
  * @returns {mat4} out
  */
+
 export function fromQuat(out, q) {
   let x = q[0],
-    y = q[1],
-    z = q[2],
-    w = q[3];
+      y = q[1],
+      z = q[2],
+      w = q[3];
   let x2 = x + x;
   let y2 = y + y;
   let z2 = z + z;
-
   let xx = x * x2;
   let yx = y * x2;
   let yy = y * y2;
@@ -1419,30 +1291,24 @@ export function fromQuat(out, q) {
   let wx = w * x2;
   let wy = w * y2;
   let wz = w * z2;
-
   out[0] = 1 - yy - zz;
   out[1] = yx + wz;
   out[2] = zx - wy;
   out[3] = 0;
-
   out[4] = yx - wz;
   out[5] = 1 - xx - zz;
   out[6] = zy + wx;
   out[7] = 0;
-
   out[8] = zx + wy;
   out[9] = zy - wx;
   out[10] = 1 - xx - yy;
   out[11] = 0;
-
   out[12] = 0;
   out[13] = 0;
   out[14] = 0;
   out[15] = 1;
-
   return out;
 }
-
 /**
  * Generates a frustum matrix with the given bounds
  *
@@ -1455,6 +1321,7 @@ export function fromQuat(out, q) {
  * @param {Number} far Far bound of the frustum
  * @returns {mat4} out
  */
+
 export function frustum(out, left, right, bottom, top, near, far) {
   let rl = 1 / (right - left);
   let tb = 1 / (top - bottom);
@@ -1477,7 +1344,6 @@ export function frustum(out, left, right, bottom, top, near, far) {
   out[15] = 0;
   return out;
 }
-
 /**
  * Generates a perspective projection matrix with the given bounds.
  * Passing null/undefined/no value for far will generate infinite projection matrix.
@@ -1489,9 +1355,10 @@ export function frustum(out, left, right, bottom, top, near, far) {
  * @param {number} far Far bound of the frustum, can be null or Infinity
  * @returns {mat4} out
  */
+
 export function perspective(out, fovy, aspect, near, far) {
   let f = 1.0 / Math.tan(fovy / 2),
-    nf;
+      nf;
   out[0] = f / aspect;
   out[1] = 0;
   out[2] = 0;
@@ -1506,6 +1373,7 @@ export function perspective(out, fovy, aspect, near, far) {
   out[12] = 0;
   out[13] = 0;
   out[15] = 0;
+
   if (far != null && far !== Infinity) {
     nf = 1 / (near - far);
     out[10] = (far + near) * nf;
@@ -1514,9 +1382,9 @@ export function perspective(out, fovy, aspect, near, far) {
     out[10] = -1;
     out[14] = -2 * near;
   }
+
   return out;
 }
-
 /**
  * Generates a perspective projection matrix with the given field of view.
  * This is primarily useful for generating projection matrices to be used
@@ -1528,14 +1396,14 @@ export function perspective(out, fovy, aspect, near, far) {
  * @param {number} far Far bound of the frustum
  * @returns {mat4} out
  */
+
 export function perspectiveFromFieldOfView(out, fov, near, far) {
-  let upTan = Math.tan((fov.upDegrees * Math.PI) / 180.0);
-  let downTan = Math.tan((fov.downDegrees * Math.PI) / 180.0);
-  let leftTan = Math.tan((fov.leftDegrees * Math.PI) / 180.0);
-  let rightTan = Math.tan((fov.rightDegrees * Math.PI) / 180.0);
+  let upTan = Math.tan(fov.upDegrees * Math.PI / 180.0);
+  let downTan = Math.tan(fov.downDegrees * Math.PI / 180.0);
+  let leftTan = Math.tan(fov.leftDegrees * Math.PI / 180.0);
+  let rightTan = Math.tan(fov.rightDegrees * Math.PI / 180.0);
   let xScale = 2.0 / (leftTan + rightTan);
   let yScale = 2.0 / (upTan + downTan);
-
   out[0] = xScale;
   out[1] = 0.0;
   out[2] = 0.0;
@@ -1550,11 +1418,10 @@ export function perspectiveFromFieldOfView(out, fov, near, far) {
   out[11] = -1.0;
   out[12] = 0.0;
   out[13] = 0.0;
-  out[14] = (far * near) / (near - far);
+  out[14] = far * near / (near - far);
   out[15] = 0.0;
   return out;
 }
-
 /**
  * Generates a orthogonal projection matrix with the given bounds
  *
@@ -1567,6 +1434,7 @@ export function perspectiveFromFieldOfView(out, fov, near, far) {
  * @param {number} far Far bound of the frustum
  * @returns {mat4} out
  */
+
 export function ortho(out, left, right, bottom, top, near, far) {
   let lr = 1 / (left - right);
   let bt = 1 / (bottom - top);
@@ -1589,7 +1457,6 @@ export function ortho(out, left, right, bottom, top, near, far) {
   out[15] = 1;
   return out;
 }
-
 /**
  * Generates a look-at matrix with the given eye position, focal point, and up axis.
  * If you want a matrix that actually makes an object look at another object, you should use targetTo instead.
@@ -1600,6 +1467,7 @@ export function ortho(out, left, right, bottom, top, near, far) {
  * @param {vec3} up vec3 pointing up
  * @returns {mat4} out
  */
+
 export function lookAt(out, eye, center, up) {
   let x0, x1, x2, y0, y1, y2, z0, z1, z2, len;
   let eyex = eye[0];
@@ -1612,27 +1480,22 @@ export function lookAt(out, eye, center, up) {
   let centery = center[1];
   let centerz = center[2];
 
-  if (
-    Math.abs(eyex - centerx) < glMatrix.EPSILON &&
-    Math.abs(eyey - centery) < glMatrix.EPSILON &&
-    Math.abs(eyez - centerz) < glMatrix.EPSILON
-  ) {
+  if (Math.abs(eyex - centerx) < glMatrix.EPSILON && Math.abs(eyey - centery) < glMatrix.EPSILON && Math.abs(eyez - centerz) < glMatrix.EPSILON) {
     return identity(out);
   }
 
   z0 = eyex - centerx;
   z1 = eyey - centery;
   z2 = eyez - centerz;
-
   len = 1 / Math.sqrt(z0 * z0 + z1 * z1 + z2 * z2);
   z0 *= len;
   z1 *= len;
   z2 *= len;
-
   x0 = upy * z2 - upz * z1;
   x1 = upz * z0 - upx * z2;
   x2 = upx * z1 - upy * z0;
   len = Math.sqrt(x0 * x0 + x1 * x1 + x2 * x2);
+
   if (!len) {
     x0 = 0;
     x1 = 0;
@@ -1647,8 +1510,8 @@ export function lookAt(out, eye, center, up) {
   y0 = z1 * x2 - z2 * x1;
   y1 = z2 * x0 - z0 * x2;
   y2 = z0 * x1 - z1 * x0;
-
   len = Math.sqrt(y0 * y0 + y1 * y1 + y2 * y2);
+
   if (!len) {
     y0 = 0;
     y1 = 0;
@@ -1676,10 +1539,8 @@ export function lookAt(out, eye, center, up) {
   out[13] = -(y0 * eyex + y1 * eyey + y2 * eyez);
   out[14] = -(z0 * eyex + z1 * eyey + z2 * eyez);
   out[15] = 1;
-
   return out;
 }
-
 /**
  * Generates a matrix that makes something look at something else.
  *
@@ -1689,19 +1550,19 @@ export function lookAt(out, eye, center, up) {
  * @param {vec3} up vec3 pointing up
  * @returns {mat4} out
  */
+
 export function targetTo(out, eye, target, up) {
   let eyex = eye[0],
-    eyey = eye[1],
-    eyez = eye[2],
-    upx = up[0],
-    upy = up[1],
-    upz = up[2];
-
+      eyey = eye[1],
+      eyez = eye[2],
+      upx = up[0],
+      upy = up[1],
+      upz = up[2];
   let z0 = eyex - target[0],
-    z1 = eyey - target[1],
-    z2 = eyez - target[2];
-
+      z1 = eyey - target[1],
+      z2 = eyez - target[2];
   let len = z0 * z0 + z1 * z1 + z2 * z2;
+
   if (len > 0) {
     len = 1 / Math.sqrt(len);
     z0 *= len;
@@ -1710,10 +1571,10 @@ export function targetTo(out, eye, target, up) {
   }
 
   let x0 = upy * z2 - upz * z1,
-    x1 = upz * z0 - upx * z2,
-    x2 = upx * z1 - upy * z0;
-
+      x1 = upz * z0 - upx * z2,
+      x2 = upx * z1 - upy * z0;
   len = x0 * x0 + x1 * x1 + x2 * x2;
+
   if (len > 0) {
     len = 1 / Math.sqrt(len);
     x0 *= len;
@@ -1739,78 +1600,26 @@ export function targetTo(out, eye, target, up) {
   out[15] = 1;
   return out;
 }
-
 /**
  * Returns a string representation of a mat4
  *
  * @param {mat4} a matrix to represent as a string
  * @returns {String} string representation of the matrix
  */
-export function str(a) {
-  return (
-    "mat4(" +
-    a[0] +
-    ", " +
-    a[1] +
-    ", " +
-    a[2] +
-    ", " +
-    a[3] +
-    ", " +
-    a[4] +
-    ", " +
-    a[5] +
-    ", " +
-    a[6] +
-    ", " +
-    a[7] +
-    ", " +
-    a[8] +
-    ", " +
-    a[9] +
-    ", " +
-    a[10] +
-    ", " +
-    a[11] +
-    ", " +
-    a[12] +
-    ", " +
-    a[13] +
-    ", " +
-    a[14] +
-    ", " +
-    a[15] +
-    ")"
-  );
-}
 
+export function str(a) {
+  return "mat4(" + a[0] + ", " + a[1] + ", " + a[2] + ", " + a[3] + ", " + a[4] + ", " + a[5] + ", " + a[6] + ", " + a[7] + ", " + a[8] + ", " + a[9] + ", " + a[10] + ", " + a[11] + ", " + a[12] + ", " + a[13] + ", " + a[14] + ", " + a[15] + ")";
+}
 /**
  * Returns Frobenius norm of a mat4
  *
  * @param {mat4} a the matrix to calculate Frobenius norm of
  * @returns {Number} Frobenius norm
  */
-export function frob(a) {
-  return Math.sqrt(
-    Math.pow(a[0], 2) +
-      Math.pow(a[1], 2) +
-      Math.pow(a[2], 2) +
-      Math.pow(a[3], 2) +
-      Math.pow(a[4], 2) +
-      Math.pow(a[5], 2) +
-      Math.pow(a[6], 2) +
-      Math.pow(a[7], 2) +
-      Math.pow(a[8], 2) +
-      Math.pow(a[9], 2) +
-      Math.pow(a[10], 2) +
-      Math.pow(a[11], 2) +
-      Math.pow(a[12], 2) +
-      Math.pow(a[13], 2) +
-      Math.pow(a[14], 2) +
-      Math.pow(a[15], 2)
-  );
-}
 
+export function frob(a) {
+  return Math.sqrt(Math.pow(a[0], 2) + Math.pow(a[1], 2) + Math.pow(a[2], 2) + Math.pow(a[3], 2) + Math.pow(a[4], 2) + Math.pow(a[5], 2) + Math.pow(a[6], 2) + Math.pow(a[7], 2) + Math.pow(a[8], 2) + Math.pow(a[9], 2) + Math.pow(a[10], 2) + Math.pow(a[11], 2) + Math.pow(a[12], 2) + Math.pow(a[13], 2) + Math.pow(a[14], 2) + Math.pow(a[15], 2));
+}
 /**
  * Adds two mat4's
  *
@@ -1819,6 +1628,7 @@ export function frob(a) {
  * @param {mat4} b the second operand
  * @returns {mat4} out
  */
+
 export function add(out, a, b) {
   out[0] = a[0] + b[0];
   out[1] = a[1] + b[1];
@@ -1838,7 +1648,6 @@ export function add(out, a, b) {
   out[15] = a[15] + b[15];
   return out;
 }
-
 /**
  * Subtracts matrix b from matrix a
  *
@@ -1847,6 +1656,7 @@ export function add(out, a, b) {
  * @param {mat4} b the second operand
  * @returns {mat4} out
  */
+
 export function subtract(out, a, b) {
   out[0] = a[0] - b[0];
   out[1] = a[1] - b[1];
@@ -1866,7 +1676,6 @@ export function subtract(out, a, b) {
   out[15] = a[15] - b[15];
   return out;
 }
-
 /**
  * Multiply each element of the matrix by a scalar.
  *
@@ -1875,6 +1684,7 @@ export function subtract(out, a, b) {
  * @param {Number} b amount to scale the matrix's elements by
  * @returns {mat4} out
  */
+
 export function multiplyScalar(out, a, b) {
   out[0] = a[0] * b;
   out[1] = a[1] * b;
@@ -1894,7 +1704,6 @@ export function multiplyScalar(out, a, b) {
   out[15] = a[15] * b;
   return out;
 }
-
 /**
  * Adds two mat4's after multiplying each element of the second operand by a scalar value.
  *
@@ -1904,6 +1713,7 @@ export function multiplyScalar(out, a, b) {
  * @param {Number} scale the amount to scale b's elements by before adding
  * @returns {mat4} out
  */
+
 export function multiplyScalarAndAdd(out, a, b, scale) {
   out[0] = a[0] + b[0] * scale;
   out[1] = a[1] + b[1] * scale;
@@ -1923,7 +1733,6 @@ export function multiplyScalarAndAdd(out, a, b, scale) {
   out[15] = a[15] + b[15] * scale;
   return out;
 }
-
 /**
  * Returns whether or not the matrices have exactly the same elements in the same position (when compared with ===)
  *
@@ -1931,27 +1740,10 @@ export function multiplyScalarAndAdd(out, a, b, scale) {
  * @param {mat4} b The second matrix.
  * @returns {Boolean} True if the matrices are equal, false otherwise.
  */
-export function exactEquals(a, b) {
-  return (
-    a[0] === b[0] &&
-    a[1] === b[1] &&
-    a[2] === b[2] &&
-    a[3] === b[3] &&
-    a[4] === b[4] &&
-    a[5] === b[5] &&
-    a[6] === b[6] &&
-    a[7] === b[7] &&
-    a[8] === b[8] &&
-    a[9] === b[9] &&
-    a[10] === b[10] &&
-    a[11] === b[11] &&
-    a[12] === b[12] &&
-    a[13] === b[13] &&
-    a[14] === b[14] &&
-    a[15] === b[15]
-  );
-}
 
+export function exactEquals(a, b) {
+  return a[0] === b[0] && a[1] === b[1] && a[2] === b[2] && a[3] === b[3] && a[4] === b[4] && a[5] === b[5] && a[6] === b[6] && a[7] === b[7] && a[8] === b[8] && a[9] === b[9] && a[10] === b[10] && a[11] === b[11] && a[12] === b[12] && a[13] === b[13] && a[14] === b[14] && a[15] === b[15];
+}
 /**
  * Returns whether or not the matrices have approximately the same elements in the same position.
  *
@@ -1959,85 +1751,51 @@ export function exactEquals(a, b) {
  * @param {mat4} b The second matrix.
  * @returns {Boolean} True if the matrices are equal, false otherwise.
  */
+
 export function equals(a, b) {
   let a0 = a[0],
-    a1 = a[1],
-    a2 = a[2],
-    a3 = a[3];
+      a1 = a[1],
+      a2 = a[2],
+      a3 = a[3];
   let a4 = a[4],
-    a5 = a[5],
-    a6 = a[6],
-    a7 = a[7];
+      a5 = a[5],
+      a6 = a[6],
+      a7 = a[7];
   let a8 = a[8],
-    a9 = a[9],
-    a10 = a[10],
-    a11 = a[11];
+      a9 = a[9],
+      a10 = a[10],
+      a11 = a[11];
   let a12 = a[12],
-    a13 = a[13],
-    a14 = a[14],
-    a15 = a[15];
-
+      a13 = a[13],
+      a14 = a[14],
+      a15 = a[15];
   let b0 = b[0],
-    b1 = b[1],
-    b2 = b[2],
-    b3 = b[3];
+      b1 = b[1],
+      b2 = b[2],
+      b3 = b[3];
   let b4 = b[4],
-    b5 = b[5],
-    b6 = b[6],
-    b7 = b[7];
+      b5 = b[5],
+      b6 = b[6],
+      b7 = b[7];
   let b8 = b[8],
-    b9 = b[9],
-    b10 = b[10],
-    b11 = b[11];
+      b9 = b[9],
+      b10 = b[10],
+      b11 = b[11];
   let b12 = b[12],
-    b13 = b[13],
-    b14 = b[14],
-    b15 = b[15];
-
-  return (
-    Math.abs(a0 - b0) <=
-      glMatrix.EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) &&
-    Math.abs(a1 - b1) <=
-      glMatrix.EPSILON * Math.max(1.0, Math.abs(a1), Math.abs(b1)) &&
-    Math.abs(a2 - b2) <=
-      glMatrix.EPSILON * Math.max(1.0, Math.abs(a2), Math.abs(b2)) &&
-    Math.abs(a3 - b3) <=
-      glMatrix.EPSILON * Math.max(1.0, Math.abs(a3), Math.abs(b3)) &&
-    Math.abs(a4 - b4) <=
-      glMatrix.EPSILON * Math.max(1.0, Math.abs(a4), Math.abs(b4)) &&
-    Math.abs(a5 - b5) <=
-      glMatrix.EPSILON * Math.max(1.0, Math.abs(a5), Math.abs(b5)) &&
-    Math.abs(a6 - b6) <=
-      glMatrix.EPSILON * Math.max(1.0, Math.abs(a6), Math.abs(b6)) &&
-    Math.abs(a7 - b7) <=
-      glMatrix.EPSILON * Math.max(1.0, Math.abs(a7), Math.abs(b7)) &&
-    Math.abs(a8 - b8) <=
-      glMatrix.EPSILON * Math.max(1.0, Math.abs(a8), Math.abs(b8)) &&
-    Math.abs(a9 - b9) <=
-      glMatrix.EPSILON * Math.max(1.0, Math.abs(a9), Math.abs(b9)) &&
-    Math.abs(a10 - b10) <=
-      glMatrix.EPSILON * Math.max(1.0, Math.abs(a10), Math.abs(b10)) &&
-    Math.abs(a11 - b11) <=
-      glMatrix.EPSILON * Math.max(1.0, Math.abs(a11), Math.abs(b11)) &&
-    Math.abs(a12 - b12) <=
-      glMatrix.EPSILON * Math.max(1.0, Math.abs(a12), Math.abs(b12)) &&
-    Math.abs(a13 - b13) <=
-      glMatrix.EPSILON * Math.max(1.0, Math.abs(a13), Math.abs(b13)) &&
-    Math.abs(a14 - b14) <=
-      glMatrix.EPSILON * Math.max(1.0, Math.abs(a14), Math.abs(b14)) &&
-    Math.abs(a15 - b15) <=
-      glMatrix.EPSILON * Math.max(1.0, Math.abs(a15), Math.abs(b15))
-  );
+      b13 = b[13],
+      b14 = b[14],
+      b15 = b[15];
+  return Math.abs(a0 - b0) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a0), Math.abs(b0)) && Math.abs(a1 - b1) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a1), Math.abs(b1)) && Math.abs(a2 - b2) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a2), Math.abs(b2)) && Math.abs(a3 - b3) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a3), Math.abs(b3)) && Math.abs(a4 - b4) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a4), Math.abs(b4)) && Math.abs(a5 - b5) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a5), Math.abs(b5)) && Math.abs(a6 - b6) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a6), Math.abs(b6)) && Math.abs(a7 - b7) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a7), Math.abs(b7)) && Math.abs(a8 - b8) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a8), Math.abs(b8)) && Math.abs(a9 - b9) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a9), Math.abs(b9)) && Math.abs(a10 - b10) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a10), Math.abs(b10)) && Math.abs(a11 - b11) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a11), Math.abs(b11)) && Math.abs(a12 - b12) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a12), Math.abs(b12)) && Math.abs(a13 - b13) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a13), Math.abs(b13)) && Math.abs(a14 - b14) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a14), Math.abs(b14)) && Math.abs(a15 - b15) <= glMatrix.EPSILON * Math.max(1.0, Math.abs(a15), Math.abs(b15));
 }
-
 /**
  * Alias for {@link mat4.multiply}
  * @function
  */
-export const mul = multiply;
 
+export const mul = multiply;
 /**
  * Alias for {@link mat4.subtract}
  * @function
  */
+
 export const sub = subtract;

@@ -6,10 +6,8 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -17,12 +15,10 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
 import { WebXRButton } from "./util/webxr-button.js";
 import { Scene } from "./render/core/scene.js";
 import { Renderer, createWebGLContext } from "./render/core/renderer.js";
 import { InlineViewerHelper } from "./util/inline-viewer-helper.js";
-
 export class WebXRSampleApp {
   constructor(options) {
     // Application options and defaults
@@ -34,43 +30,34 @@ export class WebXRSampleApp {
       inline: "inline" in options ? options.inline : true,
       immersiveMode: options.immersiveMode || "immersive-vr",
       referenceSpace: options.referenceSpace || "local",
-      defaultInputHandling:
-        "defaultInputHandling" in options ? options.defaultInputHandling : true,
+      defaultInputHandling: "defaultInputHandling" in options ? options.defaultInputHandling : true
     };
-
     this.gl = null;
     this.renderer = null;
     this.scene = new Scene();
-
     this.xrButton = new WebXRButton({
       onRequestSession: () => {
         return this.onRequestSession();
       },
-      onEndSession: (session) => {
+      onEndSession: session => {
         this.onEndSession(session);
-      },
+      }
     });
-
     this.immersiveRefSpace = null;
     this.inlineViewerHelper = null;
 
     this.frameCallback = (time, frame) => {
       let session = frame.session;
       let refSpace = this.getSessionReferenceSpace(session);
-
       session.requestAnimationFrame(this.frameCallback);
       this.scene.startFrame();
-
       this.onXRFrame(time, frame, refSpace);
-
       this.scene.endFrame();
     };
   }
 
   getSessionReferenceSpace(session) {
-    return session.isImmersive
-      ? this.immersiveRefSpace
-      : this.inlineViewerHelper.referenceSpace;
+    return session.isImmersive ? this.immersiveRefSpace : this.inlineViewerHelper.referenceSpace;
   }
 
   run() {
@@ -79,13 +66,12 @@ export class WebXRSampleApp {
 
   onInitXR() {
     if (navigator.xr) {
-      navigator.xr.isSessionSupported("immersive-vr").then((supported) => {
+      navigator.xr.isSessionSupported("immersive-vr").then(supported => {
         this.xrButton.enabled = supported;
-      });
+      }); // Request an inline session if needed.
 
-      // Request an inline session if needed.
       if (this.options.inline) {
-        navigator.xr.requestSession("inline").then((session) => {
+        navigator.xr.requestSession("inline").then(session => {
           this.onSessionStarted(session);
         });
       }
@@ -94,23 +80,25 @@ export class WebXRSampleApp {
 
   onCreateGL() {
     return createWebGLContext({
-      xrCompatible: true,
+      xrCompatible: true
     });
   }
 
   onInitRenderer() {
     if (this.gl) return;
-
     this.gl = this.onCreateGL();
 
     if (this.gl) {
       let canvas = this.gl.canvas;
+
       if (canvas instanceof HTMLCanvasElement) {
         document.body.append(this.gl.canvas);
+
         function onResize() {
           canvas.width = canvas.clientWidth * window.devicePixelRatio;
           canvas.height = canvas.clientHeight * window.devicePixelRatio;
         }
+
         window.addEventListener("resize", onResize);
         onResize();
       }
@@ -122,15 +110,13 @@ export class WebXRSampleApp {
 
   onRequestSession() {
     // Called when the button gets clicked. Requests an immersive session.
-    return navigator.xr
-      .requestSession(this.options.immersiveMode, {
-        requiredFeatures: [this.options.referenceSpace],
-      })
-      .then((session) => {
-        this.xrButton.setSession(session);
-        session.isImmersive = true;
-        this.onSessionStarted(session);
-      });
+    return navigator.xr.requestSession(this.options.immersiveMode, {
+      requiredFeatures: [this.options.referenceSpace]
+    }).then(session => {
+      this.xrButton.setSession(session);
+      session.isImmersive = true;
+      this.onSessionStarted(session);
+    });
   }
 
   onEndSession(session) {
@@ -138,37 +124,29 @@ export class WebXRSampleApp {
   }
 
   onSessionStarted(session) {
-    session.addEventListener("end", (event) => {
+    session.addEventListener("end", event => {
       this.onSessionEnded(event.session);
     });
 
     if (this.options.defaultInputHandling) {
-      session.addEventListener("select", (event) => {
+      session.addEventListener("select", event => {
         let refSpace = this.getSessionReferenceSpace(event.frame.session);
         this.scene.handleSelect(event.inputSource, event.frame, refSpace);
       });
     }
 
     this.onInitRenderer();
-
     this.scene.inputRenderer.useProfileControllerMeshes(session);
-
     session.updateRenderState({
-      baseLayer: new XRWebGLLayer(session, this.gl),
+      baseLayer: new XRWebGLLayer(session, this.gl)
     });
-
-    this.onRequestReferenceSpace(session).then((refSpace) => {
+    this.onRequestReferenceSpace(session).then(refSpace => {
       if (session.isImmersive) {
         this.immersiveRefSpace = refSpace;
       } else {
-        this.inlineViewerHelper = new InlineViewerHelper(
-          this.gl.canvas,
-          refSpace
-        );
-        if (
-          this.options.referenceSpace == "local-floor" ||
-          this.options.referenceSpace == "bounded-floor"
-        ) {
+        this.inlineViewerHelper = new InlineViewerHelper(this.gl.canvas, refSpace);
+
+        if (this.options.referenceSpace == "local-floor" || this.options.referenceSpace == "bounded-floor") {
           this.inlineViewerHelper.setHeight(1.6);
         }
       }
@@ -189,14 +167,17 @@ export class WebXRSampleApp {
     if (session == this.xrButton.session) {
       this.xrButton.setSession(null);
     }
-  }
+  } // Override to customize frame handling
 
-  // Override to customize frame handling
+
   onXRFrame(time, frame, refSpace) {
     let pose = frame.getViewerPose(refSpace);
+
     if (this.options.defaultInputHandling) {
       this.scene.updateInputSources(frame, refSpace);
     }
+
     this.scene.drawXRFrame(frame, pose);
   }
+
 }

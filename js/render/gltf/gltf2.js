@@ -6,10 +6,8 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -17,18 +15,16 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
 import { PbrMaterial } from "../materials/pbr.js";
 import { Node } from "../core/node.js";
 import { Primitive, PrimitiveAttribute } from "../core/primitive.js";
 import { ImageTexture, ColorTexture } from "../core/texture.js";
-
 const GL = WebGLRenderingContext; // For enums
 
 const GLB_MAGIC = 0x46546c67;
 const CHUNK_TYPE = {
   JSON: 0x4e4f534a,
-  BIN: 0x004e4942,
+  BIN: 0x004e4942
 };
 
 function isAbsoluteUri(uri) {
@@ -45,6 +41,7 @@ function resolveUri(uri, baseUrl) {
   if (isAbsoluteUri(uri) || isDataUri(uri)) {
     return uri;
   }
+
   return baseUrl + uri;
 }
 
@@ -52,21 +49,25 @@ function getComponentCount(type) {
   switch (type) {
     case "SCALAR":
       return 1;
+
     case "VEC2":
       return 2;
+
     case "VEC3":
       return 3;
+
     case "VEC4":
       return 4;
+
     default:
       return 0;
   }
 }
-
 /**
  * Gltf2SceneLoader
  * Loads glTF 2.0 scenes into a renderable node tree.
  */
+
 
 export class Gltf2Loader {
   constructor(renderer) {
@@ -75,16 +76,16 @@ export class Gltf2Loader {
   }
 
   loadFromUrl(url) {
-    return fetch(url).then((response) => {
+    return fetch(url).then(response => {
       let i = url.lastIndexOf("/");
       let baseUrl = i !== 0 ? url.substring(0, i + 1) : "";
 
       if (url.endsWith(".gltf")) {
-        return response.json().then((json) => {
+        return response.json().then(json => {
           return this.loadFromJson(json, baseUrl);
         });
       } else if (url.endsWith(".glb")) {
-        return response.arrayBuffer().then((arrayBuffer) => {
+        return response.arrayBuffer().then(arrayBuffer => {
           return this.loadFromBinary(arrayBuffer, baseUrl);
         });
       } else {
@@ -109,14 +110,12 @@ export class Gltf2Loader {
 
     let chunks = {};
     let chunkOffset = 12;
+
     while (chunkOffset < length) {
       let chunkHeaderView = new DataView(arrayBuffer, chunkOffset, 8);
       let chunkLength = chunkHeaderView.getUint32(0, true);
       let chunkType = chunkHeaderView.getUint32(4, true);
-      chunks[chunkType] = arrayBuffer.slice(
-        chunkOffset + 8,
-        chunkOffset + 8 + chunkLength
-      );
+      chunks[chunkType] = arrayBuffer.slice(chunkOffset + 8, chunkOffset + 8 + chunkLength);
       chunkOffset += chunkLength + 8;
     }
 
@@ -140,6 +139,7 @@ export class Gltf2Loader {
     }
 
     let buffers = [];
+
     if (binaryChunk) {
       buffers[0] = new Gltf2Resource({}, baseUrl, binaryChunk);
     } else {
@@ -149,11 +149,13 @@ export class Gltf2Loader {
     }
 
     let bufferViews = [];
+
     for (let bufferView of json.bufferViews) {
       bufferViews.push(new Gltf2BufferView(bufferView, buffers));
     }
 
     let images = [];
+
     if (json.images) {
       for (let image of json.images) {
         images.push(new Gltf2Resource(image, baseUrl));
@@ -161,10 +163,12 @@ export class Gltf2Loader {
     }
 
     let textures = [];
+
     if (json.textures) {
       for (let texture of json.textures) {
         let image = images[texture.source];
         let glTexture = image.texture(bufferViews);
+
         if (texture.sampler) {
           let sampler = sampler[texture.sampler];
           glTexture.sampler.minFilter = sampler.minFilter;
@@ -172,6 +176,7 @@ export class Gltf2Loader {
           glTexture.sampler.wrapS = sampler.wrapS;
           glTexture.sampler.wrapT = sampler.wrapT;
         }
+
         textures.push(glTexture);
       }
     }
@@ -180,32 +185,26 @@ export class Gltf2Loader {
       if (!textureInfo) {
         return null;
       }
+
       return textures[textureInfo.index];
     }
 
     let materials = [];
+
     if (json.materials) {
       for (let material of json.materials) {
         let glMaterial = new PbrMaterial();
         let pbr = material.pbrMetallicRoughness || {};
-
         glMaterial.baseColorFactor.value = pbr.baseColorFactor || [1, 1, 1, 1];
         glMaterial.baseColor.texture = getTexture(pbr.baseColorTexture);
-        glMaterial.metallicRoughnessFactor.value = [
-          pbr.metallicFactor || 1.0,
-          pbr.roughnessFactor || 1.0,
-        ];
-        glMaterial.metallicRoughness.texture = getTexture(
-          pbr.metallicRoughnessTexture
-        );
+        glMaterial.metallicRoughnessFactor.value = [pbr.metallicFactor || 1.0, pbr.roughnessFactor || 1.0];
+        glMaterial.metallicRoughness.texture = getTexture(pbr.metallicRoughnessTexture);
         glMaterial.normal.texture = getTexture(material.normalTexture);
         glMaterial.occlusion.texture = getTexture(material.occlusionTexture);
-        glMaterial.occlusionStrength.value =
-          material.occlusionTexture && material.occlusionTexture.strength
-            ? material.occlusionTexture.strength
-            : 1.0;
+        glMaterial.occlusionStrength.value = material.occlusionTexture && material.occlusionTexture.strength ? material.occlusionTexture.strength : 1.0;
         glMaterial.emissiveFactor.value = material.emissiveFactor || [0, 0, 0];
         glMaterial.emissive.texture = getTexture(material.emissiveTexture);
+
         if (!glMaterial.emissive.texture && material.emissiveFactor) {
           glMaterial.emissive.texture = new ColorTexture(1.0, 1.0, 1.0, 1.0);
         }
@@ -214,32 +213,34 @@ export class Gltf2Loader {
           case "BLEND":
             glMaterial.state.blend = true;
             break;
+
           case "MASK":
             // Not really supported.
             glMaterial.state.blend = true;
             break;
+
           default:
             // Includes 'OPAQUE'
             glMaterial.state.blend = false;
-        }
-
-        // glMaterial.alpha_mode = material.alphaMode;
+        } // glMaterial.alpha_mode = material.alphaMode;
         // glMaterial.alpha_cutoff = material.alphaCutoff;
-        glMaterial.state.cullFace = !material.doubleSided;
 
+
+        glMaterial.state.cullFace = !material.doubleSided;
         materials.push(glMaterial);
       }
     }
 
     let accessors = json.accessors;
-
     let meshes = [];
+
     for (let mesh of json.meshes) {
       let glMesh = new Gltf2Mesh();
       meshes.push(glMesh);
 
       for (let primitive of mesh.primitives) {
         let material = null;
+
         if ("material" in primitive) {
           material = materials[primitive.material];
         } else {
@@ -259,15 +260,7 @@ export class Gltf2Loader {
           let accessor = accessors[primitive.attributes[name]];
           let bufferView = bufferViews[accessor.bufferView];
           elementCount = accessor.count;
-
-          let glAttribute = new PrimitiveAttribute(
-            name,
-            bufferView.renderBuffer(this.renderer, GL.ARRAY_BUFFER),
-            getComponentCount(accessor.type),
-            accessor.componentType,
-            bufferView.byteStride || 0,
-            accessor.byteOffset || 0
-          );
+          let glAttribute = new PrimitiveAttribute(name, bufferView.renderBuffer(this.renderer, GL.ARRAY_BUFFER), getComponentCount(accessor.type), accessor.componentType, bufferView.byteStride || 0, accessor.byteOffset || 0);
           glAttribute.normalized = accessor.normalized || false;
 
           if (name == "POSITION") {
@@ -278,21 +271,12 @@ export class Gltf2Loader {
           attributes.push(glAttribute);
         }
 
-        let glPrimitive = new Primitive(
-          attributes,
-          elementCount,
-          primitive.mode
-        );
+        let glPrimitive = new Primitive(attributes, elementCount, primitive.mode);
 
         if ("indices" in primitive) {
           let accessor = accessors[primitive.indices];
           let bufferView = bufferViews[accessor.bufferView];
-
-          glPrimitive.setIndexBuffer(
-            bufferView.renderBuffer(this.renderer, GL.ELEMENT_ARRAY_BUFFER),
-            accessor.byteOffset || 0,
-            accessor.componentType
-          );
+          glPrimitive.setIndexBuffer(bufferView.renderBuffer(this.renderer, GL.ELEMENT_ARRAY_BUFFER), accessor.byteOffset || 0, accessor.componentType);
           glPrimitive.indexType = accessor.componentType;
           glPrimitive.indexByteOffset = accessor.byteOffset || 0;
           glPrimitive.elementCount = accessor.count;
@@ -300,18 +284,17 @@ export class Gltf2Loader {
 
         if (min && max) {
           glPrimitive.setBounds(min, max);
-        }
-
-        // After all the attributes have been processed, get a program that is
+        } // After all the attributes have been processed, get a program that is
         // appropriate for both the material and the primitive attributes.
-        glMesh.primitives.push(
-          this.renderer.createRenderPrimitive(glPrimitive, material)
-        );
+
+
+        glMesh.primitives.push(this.renderer.createRenderPrimitive(glPrimitive, material));
       }
     }
 
     let sceneNode = new Node();
     let scene = json.scenes[json.scene];
+
     for (let nodeId of scene.nodes) {
       let node = json.nodes[nodeId];
       sceneNode.addNode(this.processNodes(node, json.nodes, meshes));
@@ -326,6 +309,7 @@ export class Gltf2Loader {
 
     if ("mesh" in node) {
       let mesh = meshes[node.mesh];
+
       for (let primitive of mesh.primitives) {
         glNode.addRenderPrimitive(primitive);
       }
@@ -356,12 +340,14 @@ export class Gltf2Loader {
 
     return glNode;
   }
+
 }
 
 class Gltf2Mesh {
   constructor() {
     this.primitives = [];
   }
+
 }
 
 class Gltf2BufferView {
@@ -370,17 +356,17 @@ class Gltf2BufferView {
     this.byteOffset = json.byteOffset || 0;
     this.byteLength = json.byteLength || null;
     this.byteStride = json.byteStride;
-
     this._viewPromise = null;
     this._renderBuffer = null;
   }
 
   dataView() {
     if (!this._viewPromise) {
-      this._viewPromise = this.buffer.arrayBuffer().then((arrayBuffer) => {
+      this._viewPromise = this.buffer.arrayBuffer().then(arrayBuffer => {
         return new DataView(arrayBuffer, this.byteOffset, this.byteLength);
       });
     }
+
     return this._viewPromise;
   }
 
@@ -388,17 +374,19 @@ class Gltf2BufferView {
     if (!this._renderBuffer) {
       this._renderBuffer = renderer.createRenderBuffer(target, this.dataView());
     }
+
     return this._renderBuffer;
   }
+
 }
 
 class Gltf2Resource {
   constructor(json, baseUrl, arrayBuffer) {
     this.json = json;
     this.baseUrl = baseUrl;
-
     this._dataPromise = null;
     this._texture = null;
+
     if (arrayBuffer) {
       this._dataPromise = Promise.resolve(arrayBuffer);
     }
@@ -407,21 +395,15 @@ class Gltf2Resource {
   arrayBuffer() {
     if (!this._dataPromise) {
       if (isDataUri(this.json.uri)) {
-        let base64String = this.json.uri.replace(
-          "data:application/octet-stream;base64,",
-          ""
-        );
-        let binaryArray = Uint8Array.from(atob(base64String), (c) =>
-          c.charCodeAt(0)
-        );
+        let base64String = this.json.uri.replace("data:application/octet-stream;base64,", "");
+        let binaryArray = Uint8Array.from(atob(base64String), c => c.charCodeAt(0));
         this._dataPromise = Promise.resolve(binaryArray.buffer);
         return this._dataPromise;
       }
 
-      this._dataPromise = fetch(
-        resolveUri(this.json.uri, this.baseUrl)
-      ).then((response) => response.arrayBuffer());
+      this._dataPromise = fetch(resolveUri(this.json.uri, this.baseUrl)).then(response => response.arrayBuffer());
     }
+
     return this._dataPromise;
   }
 
@@ -438,13 +420,18 @@ class Gltf2Resource {
         }
       } else {
         this._texture.genDataKey();
+
         let view = bufferViews[this.json.bufferView];
-        view.dataView().then((dataView) => {
-          let blob = new Blob([dataView], { type: this.json.mimeType });
+        view.dataView().then(dataView => {
+          let blob = new Blob([dataView], {
+            type: this.json.mimeType
+          });
           img.src = window.URL.createObjectURL(blob);
         });
       }
     }
+
     return this._texture;
   }
+
 }

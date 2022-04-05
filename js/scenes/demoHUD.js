@@ -8,28 +8,25 @@
   this selection logic to start to build your own HUD controls.
 */
 import { lcb, rcb } from '../handle_scenes.js';
-
 export const init = async model => {
-   let isAnimate = 0, isItalic = 0, isClear = 0;
-   model.control('a', 'animate', () => isAnimate = ! isAnimate);
-   model.control('c', 'clear'  , () => isClear   = ! isClear  );
-   model.control('i', 'italic' , () => isItalic  = ! isItalic );
+  let isAnimate = 0,
+      isItalic = 0,
+      isClear = 0;
+  model.control('a', 'animate', () => isAnimate = !isAnimate);
+  model.control('c', 'clear', () => isClear = !isClear);
+  model.control('i', 'italic', () => isItalic = !isItalic);
+  let text = `Now is the time   \nfor all good men  \nto come to the aid\nof their party.   `.split('\n');
+  let label = model.add();
 
-   let text = `Now is the time   \nfor all good men  \nto come to the aid\nof their party.   ` .split('\n');
+  for (let line = 0; line < text.length; line++) label.add('label').move(0, -line, 0).scale(.5);
 
-   let label = model.add();
+  model.animate(() => {
+    label.setMatrix(model.viewMatrix()).move(0, 0, -1).turnY(Math.PI).scale(.1);
+    label.flag('uTransparentTexture', isClear);
 
-   for (let line = 0 ; line < text.length ; line++)
-      label.add('label').move(0,-line,0).scale(.5);
-
-   model.animate(() => {
-      label.setMatrix(model.viewMatrix()).move(0,0,-1).turnY(Math.PI).scale(.1);
-      label.flag('uTransparentTexture', isClear);
-      for (let line = 0 ; line < text.length ; line++) {
-         let obj = label.child(line);
-         obj.info((isItalic ? '<i>' : '') + text[line])
-	    .color(lcb.hitLabel(obj) ? [1,.5,.5] :
-	           rcb.hitLabel(obj) ? [.3,1,1] : [1,1,1]);
-      }
-   });
-}
+    for (let line = 0; line < text.length; line++) {
+      let obj = label.child(line);
+      obj.info((isItalic ? '<i>' : '') + text[line]).color(lcb.hitLabel(obj) ? [1, .5, .5] : rcb.hitLabel(obj) ? [.3, 1, 1] : [1, 1, 1]);
+    }
+  });
+};
