@@ -38,6 +38,7 @@ window.model = 0;
 import WebXRPolyfill from "./third-party/webxr-polyfill/build/webxr-polyfill.module.js";
 import { updateObject } from "./util/object-sync.js";
 import { updateHandtracking } from "./render/core/handtrackingInput.js";
+import { reinit } from "./handle_scenes.js";
 if (QueryArgs.getBool("usePolyfill", true)) {
     let polyfill = new WebXRPolyfill();
 }
@@ -615,6 +616,7 @@ function updateObjects() {
         window.objects[id].node.matrix = matrix;
     }
 }
+
 
 // Start the XR application.
 // initXR();

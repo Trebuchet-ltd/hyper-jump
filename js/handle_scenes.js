@@ -178,6 +178,18 @@ function addScene(name, path) {
    nameToScene.set(entry.name, entry);
 }
 
+function removeScene(){
+   window.currentName = '';
+   window.currentID   = -1;
+   currentDemo = null;
+   scenesInit = false;
+   idToScene = new Map();
+   nameToScene = new Map();
+   nextSceneID = 0;
+   sceneNames = [];
+   sceneList  = [];
+}
+
 // load scenes asynchronously via dynamic import
 async function loadScene(info) {
    let wasValid = (info.isValid == true);
@@ -200,8 +212,8 @@ async function loadScene(info) {
 // initialize the scene system
 
 const rootPath = "./scenes/";
-async function init() {
-   return import("./scenes/scenes.js").then((userInitNamespace) => {
+async function init(path) {
+   return import(path).then((userInitNamespace) => {
       let params = null;      
       if (!userInitNamespace.default) {
          console.warn("No user initialization procedure specified!");
@@ -244,7 +256,21 @@ async function init() {
    });
 }
 
-init();
+init("./scenes/scenes.js");
+
+
+export async function reinit(path){
+   console.log("curent Demo", currentDemo)
+   if (currentDemo) {
+      stopDemo(currentDemo);
+   }
+
+   removeScene();
+   await init(path);
+   // runDemo(currentDemo)
+}
+
+
 
 export let scenes = function () {
    if (!scenesInit || window.currentID == -1) {
