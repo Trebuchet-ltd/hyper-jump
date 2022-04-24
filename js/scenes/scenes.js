@@ -9,10 +9,13 @@ export default (() => {
     scenes: [{
       name: "Demo4D",
       path: "./demo4D.js"
-    }, {
-      name: "Demo4DM",
-      path: "./demo4D1.js"
-    }, {
+    }
+    // ,
+    //   {
+    //   name: "Demo4DM",
+    //   path: "./demo4D1.js"
+    // }
+    , {
       name: "DemoBlobs",
       path: "./demoBlobs.js"
     }, {

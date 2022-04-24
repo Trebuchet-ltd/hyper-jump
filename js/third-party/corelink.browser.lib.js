@@ -30,7 +30,7 @@ if (typeof window.corelink !== 'undefined') {
 } // Main Namespace
 
 
-const corelink = {};
+var   corelink = {};
 (function () {
   // set debug to true for additional error reporting
   let debug = true; // const headerSize = Buffer.alloc(6)

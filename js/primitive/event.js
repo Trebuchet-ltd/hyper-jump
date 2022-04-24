@@ -9,7 +9,7 @@ export function initSelfAvatar(id) {
   if (!window.avatars) {
     window.avatars = {};
   } // create self avatar
-
+  console.log("Njan logging:", "initSelfAvatar()", {id, avatars});
 
   initAvatar(id);
   window.playerid = id;
