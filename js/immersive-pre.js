@@ -193,7 +193,7 @@ export function initXR() {
 }
 
 function setAvatarSync() {
-  setInterval(function () {
+  window.avatar_interval = setInterval(function () {
     if (window.playerid != null) {
       var msg = corelink_message("avatar", window.playerid);
       corelink.send(metaroomSyncSender, msg); // console.log("corelink.send", msg);
@@ -207,7 +207,12 @@ window.testws = function () {
 };
 
 function initGL() {
+  console.log("Njan logging:", "initGL()");
+
   if (gl) return;
+
+  console.log("Njan logging:", "gl ella !!!");
+
   gl = createWebGLContext({
     xrCompatible: true,
     webgl2: true

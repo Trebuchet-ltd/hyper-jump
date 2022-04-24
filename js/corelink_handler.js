@@ -30,6 +30,7 @@ const run = async () => {
   // checkInternet();
   if (window.offlineMode) {
     // Start the XR application.
+    console.log("Njan logging:", "offlineMode");
     initSelfAvatar(0);
     initXR();
     return;
@@ -207,4 +208,5 @@ function rand() {
   return Math.random();
 }
 
+console.log("Njan logging:", "run()");
 run();
