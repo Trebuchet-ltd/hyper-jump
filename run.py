@@ -1,12 +1,14 @@
-#Use to create local host
+# Use to create local host
+import sys
+
 import http.server
 import socketserver
 
-PORT = 8000
+PORT = int(sys.argv[1])
 
 Handler = http.server.SimpleHTTPRequestHandler
 Handler.extensions_map.update({
-      ".js": "application/javascript",
+    ".js": "application/javascript",
 })
 
 httpd = socketserver.TCPServer(("", PORT), Handler)
