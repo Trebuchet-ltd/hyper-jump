@@ -3,7 +3,7 @@ import { Node } from "./render/core/node.js"
 
 console.log("global");
 
-let scene_ = new Scene();
+var scene_ = new Scene();
 
 console.log(scene_);
 
