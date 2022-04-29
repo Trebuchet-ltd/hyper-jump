@@ -10,6 +10,6 @@ export const init = async model => {
     const triggerR = buttonState.right[0].pressed;
 
     if ((lcb.hitRect(target) || rcb.hitRect(target)) && (triggerR || triggerL))
-        await reinit("./repos/jump/scenes/scenes.js");
+        await reinit("./vrs/test/scenes/scenes.js");
   });
 }
