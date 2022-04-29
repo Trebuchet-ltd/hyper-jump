@@ -11,7 +11,7 @@ export let gltfRoot = scene_.addNode(new Node());
 
 export function scene()
 {
-	return scene_;
+	return scene_ || (scene_ = new Scene());
 }
 
 export function setScene(s)
@@ -19,7 +19,7 @@ export function setScene(s)
 	scene_ = s;
 }
 
-let sceneNames_ = "";
+var sceneNames_ = "";
 
 
 
