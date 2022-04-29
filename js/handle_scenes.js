@@ -120,6 +120,8 @@ const addDemoButtons = demoNames => {
 	                            .move(1,1.7-n*.1,.7)
 	                            .turnY(Math.PI/6)
 				    .scale(.045);
+
+         console.log(clay.vrWidgets);
       }
       else {
          header.innerHTML += '<button id=\"Speak\" onclick=\"window.' + flag + '=!window.' + flag
@@ -178,7 +180,18 @@ function addScene(name, path) {
    nameToScene.set(entry.name, entry);
 }
 
+function resetHeadder(){
+   document.getElementById("header").innerHTML = `
+     <details open>
+      <summary>Welcome to the FutureClassroom!!</summary>
+      <dev id=messages>&nbsp;</dev>
+        <!-- <a class="back" href="./">Back</a> -->
+    </details>
+   `;
+}
+
 function removeScene(){
+   resetHeadder()
    window.currentName = '';
    window.currentID   = -1;
    currentDemo = null;
@@ -188,6 +201,19 @@ function removeScene(){
    nextSceneID = 0;
    sceneNames = [];
    sceneList  = [];
+
+   global.scene().removeNode(window.gftl2_node);
+
+   // global.demoNames().split(",")
+   //     .map((name) => clay.vrWidgets.remove('label').info(name.trim()));
+
+   window.gftl2_node.clearRenderPrimitives()
+
+   global.setDemoNames("");
+   window["getSceneFlagByID"] = {};
+   window["setSceneFlagByID"] = {};
+
+   clay.vrWidgets.clear();
 }
 
 // load scenes asynchronously via dynamic import
@@ -353,6 +379,7 @@ function runDemo(demo) {
 }
 
 function stopDemo(demo) {
+   console.log("in stop demo", demo)
    demo._isStarted = false;
    demo._isReady = false;
    if(currentDemo == demo) {
