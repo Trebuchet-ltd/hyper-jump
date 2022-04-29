@@ -10,17 +10,7 @@ export default () => {
    return {
       enableSceneReloading: true,
       scenes: [
-         { name: "Demo4D"        , path: "./demo4D.js"        },
-         { name: "Demo4DM"       , path: "./demo4D1.js"       },
-         { name: "DemoBlobs"     , path: "./demoBlobs.js"     },
-         { name: "DemoCube"      , path: "./demoCube.js"      },
-         { name: "DemoDots"      , path: "./demoDots.js"      },
-         // { name: "DemoGLTF"      , path: "./demoGLTF.js"      },
-         // { name: "DemoGreenThumb", path: "./demoGreenThumb.js"},
-         // { name: "DemoHUD"       , path: "./demoHUD.js"       },
-         // { name: "DemoLabel"     , path: "./demoLabel.js"     },
-         // { name: "DemoNoisyCube" , path: "./demoNoisyCube.js" },
-         // { name: "DemoZoom"      , path: "./demoZoom.js"      },
+         { name: "%REPO_NAME%", path: "%REPO_NAME%.js" },
          { name: "DemoHyperlink" , path: "./demoHyperlink.js" },
       ]
    };
