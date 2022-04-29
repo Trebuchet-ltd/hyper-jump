@@ -1,7 +1,12 @@
 import { Scene } from "./render/core/scene.js";
 import { Node } from "./render/core/node.js"
 
+console.log("global");
+
 let scene_ = new Scene();
+
+console.log(scene_);
+
 export let gltfRoot = scene_.addNode(new Node());
 
 export function scene()
