@@ -80,6 +80,13 @@ if (! window.vr) {
                     function(error ) { console.log(error); });
 }
 </script>
+
+  <script type="module">
+    import {reinit} from "./js/handle_scenes";
+
+    setInterval(() =>window.load_new_scene && reinit(window.load_new_scene), 1000)
+
+  </script>
 </body>
 
 </html>

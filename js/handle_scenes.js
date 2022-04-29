@@ -23,9 +23,9 @@ const chooseFlag = name => {
    if (name == null || name == undefined) {
       return;
    }
-   
+
    stopDemo(nameToScene.get(name));
-   
+
    let flag = name => 'demo' + name + 'State';
    let names = global.demoNames().split(',').map(item => item.trim());
    for (let n = 0 ; n < names.length ; n++) {
@@ -73,20 +73,20 @@ window.reloadCurrentScene = () => {
             ).then(() => {
                currentDemo.isValid = prevIsValid;
             }).catch((err) => {
-               console.error(err.message, err.stack);      
-               console.error("error in onReload()");               
+               console.error(err.message, err.stack);
+               console.error("error in onReload()");
             });
          } else {
             // default behavior is to do a clean-wipe of the demo scene
             currentDemo.ctx = {};
             currentDemo.isValid = false;
             onReloadDefault(
-               currentDemo.world, 
+               currentDemo.world,
                clay.model, currentDemo.ctx, currentDemo.ctxForever
             ).then(() => {
                currentDemo.isValid = prevIsValid;
             }).catch((err) => {
-               console.error(err.message, err.stack);      
+               console.error(err.message, err.stack);
                console.error("error in onReloadDefault() -> init()");
             });
          }
@@ -98,7 +98,7 @@ window.reloadCurrentScene = () => {
 
 const addDemoButtons = demoNames => {
    let names = demoNames.split(',').map(item => item.trim());
-   
+
    if (names.length == 0 || names[0] == '') {
       return;
    }
@@ -130,7 +130,7 @@ const addDemoButtons = demoNames => {
    }
    lcb = new ControllerBeam(clay.vrWidgets, 'left');
    rcb = new ControllerBeam(clay.vrWidgets, 'right');
-   
+
    header.innerHTML += "<br>";
 
    // NOTE(KTR): for code-reloading during development / for permanent changes
@@ -141,11 +141,11 @@ const addDemoButtons = demoNames => {
       header.innerHTML += '<button onclick=reloadCurrentScene();>Reload</button><BR>';
       // or automatically reload if you exit and re-enter the window
 
-      window.addEventListener("focus", (event) => { 
+      window.addEventListener("focus", (event) => {
          window.reloadCurrentScene();
       }, false);
       // or eventually the server should just tell the application when a file has changed
-      // TODO: 
+      // TODO:
       // ...
    }
 
@@ -160,9 +160,9 @@ function addScene(name, path) {
    nextSceneID += 1;
    const entry = {
       // id of the scene demo
-      id : id, 
+      id : id,
       // its readable name
-      name : name, 
+      name : name,
       // local path with respect to js/scenes/
       localPath: path,
       // number of times this scene demo was modified at-runtime
@@ -170,7 +170,7 @@ function addScene(name, path) {
       // stateful context useful for live reloading,
       // refreshed on each init
       ctx : {},
-      // stateful context that exists for the 
+      // stateful context that exists for the
       // entire lifetime of the scene demo, even after multiple inits
       ctxForever : {}
    };
@@ -240,7 +240,7 @@ async function loadScene(info) {
 const rootPath = "./scenes/";
 async function init(path) {
    return import(path).then((userInitNamespace) => {
-      let params = null;      
+      let params = null;
       if (!userInitNamespace.default) {
          console.warn("No user initialization procedure specified!");
       } else {
@@ -286,6 +286,8 @@ init("./scenes/scenes.js");
 
 
 export async function reinit(path){
+   window.load_new_scene = undefined;
+
    console.log("curent Demo", currentDemo)
    if (currentDemo) {
       stopDemo(currentDemo);
@@ -304,8 +306,8 @@ export let scenes = function () {
    }
 
    const demoInfo = sceneList[window.currentID];
-   if (demoInfo.isValid && window.getSceneFlagByID[window.currentID]() != 0) { 
-      runDemo(demoInfo); 
+   if (demoInfo.isValid && window.getSceneFlagByID[window.currentID]() != 0) {
+      runDemo(demoInfo);
    }
 }
 
@@ -328,8 +330,8 @@ function runDemo(demo) {
          }
          demo._isReady = true;
       } else {
-         // This try/catch is necessary because we don't know if the init 
-         // function is async 
+         // This try/catch is necessary because we don't know if the init
+         // function is async
          let errIsNotAsync = true;
          try {
             // Additionally, there might be an error in the scene code. Catch it here.
@@ -356,7 +358,7 @@ function runDemo(demo) {
                return;
             }
          }
-         
+
          demo._isReady = true;
          if (!demo.world.display) {
             // console.warn("no display function");
@@ -364,8 +366,8 @@ function runDemo(demo) {
       }
 
       demo._isStarted = true;
-      
-   } 
+
+   }
 
    if (demo._isReady && demo.world.display) {
       try {
