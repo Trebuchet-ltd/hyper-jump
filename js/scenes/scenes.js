@@ -10,8 +10,7 @@ export default () => {
    return {
       enableSceneReloading: true,
       scenes: [
-         // { name: "%REPO_NAME%", path: "%REPO_NAME%.js" },
-         { name: "DemoHyperlink" , path: "./demoHyperlink.js" },
+          // ##
       ]
    };
 }
