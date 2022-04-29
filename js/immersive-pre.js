@@ -1,5 +1,5 @@
 import { WebXRButton } from "./util/webxr-button.js";
-import * as global from "./global.js";
+import { scene, setXREntry, setIsImmersive } from "./global.js";
 import { Renderer, createWebGLContext } from "./render/core/renderer.js";
 import { Gltf2Node } from "./render/nodes/gltf2.js";
 import { Node } from './render/core/node.js';
@@ -76,19 +76,19 @@ function initModels() {
     });
     window.models["stereo"].visible = true;
     */
-    // global.scene().addNode(window.models['stereo']);
+    // scene().addNode(window.models['stereo']);
 }
 
-global.scene().standingStats(true);
-// global.scene().addNode(window.models['stereo']);
+scene().standingStats(true);
+// scene().addNode(window.models['stereo']);
 
-function createBoxPrimitive(r, g, b) {	
-    let boxBuilder = new BoxBuilder();	
-    boxBuilder.pushCube([0, 0, 0], 1);	
-    let boxPrimitive = boxBuilder.finishPrimitive(renderer);	
-    let boxMaterial = new PbrMaterial();	
-    boxMaterial.baseColorFactor.value = [r, g, b, 1];	
-    return renderer.createRenderPrimitive(boxPrimitive, boxMaterial);	
+function createBoxPrimitive(r, g, b) {
+    let boxBuilder = new BoxBuilder();
+    boxBuilder.pushCube([0, 0, 0], 1);
+    let boxPrimitive = boxBuilder.finishPrimitive(renderer);
+    let boxMaterial = new PbrMaterial();
+    boxMaterial.baseColorFactor.value = [r, g, b, 1];
+    return renderer.createRenderPrimitive(boxPrimitive, boxMaterial);
   }
 
   function addBox(x, y, z, r, g, b, offset) {
@@ -102,10 +102,10 @@ function createBoxPrimitive(r, g, b) {
 
   function initHands() {
     for (const box of boxes_left) {
-      global.scene().removeNode(box);
+      scene().removeNode(box);
     }
     for (const box of boxes_right) {
-      global.scene().removeNode(box);
+      scene().removeNode(box);
     }
     boxes_left = [];
     boxes_right = [];
@@ -120,10 +120,10 @@ function createBoxPrimitive(r, g, b) {
       }
     }
     if (indexFingerBoxes.left) {
-      global.scene().removeNode(indexFingerBoxes.left);
+      scene().removeNode(indexFingerBoxes.left);
     }
     if (indexFingerBoxes.right) {
-      global.scene().removeNode(indexFingerBoxes.right);
+      scene().removeNode(indexFingerBoxes.right);
     }
     indexFingerBoxes.left = addBox(0, 0, 0, leftBoxColor.r, leftBoxColor.g, leftBoxColor.b);
     indexFingerBoxes.right = addBox(0, 0, 0, rightBoxColor.r, rightBoxColor.g, rightBoxColor.b);
@@ -133,7 +133,7 @@ export function initXR() {
         onRequestSession: onRequestSession,
         onEndSession: onEndSession,
     });
-    global.setXREntry(xrButton);
+    setXREntry(xrButton);
 
     if (navigator.xr) {
         navigator.xr.isSessionSupported("immersive-vr").then((supported) => {
@@ -141,13 +141,13 @@ export function initXR() {
             xrButton.enabled = supported;
             window.vr = supported;
             window.avatars[window.playerid].vr = window.vr;
-            global.setIsImmersive(supported);
+            setIsImmersive(supported);
         }).catch((err) => {
             console.warn("immersive-vr not supported on this platform!");
         });
 
         // Load multiple audio sources.
-        // loadAudioSources(global.scene());
+        // loadAudioSources(scene());
 
         navigator.xr.requestSession("inline").then(onSessionStarted);
     } else {
@@ -202,21 +202,21 @@ function initGL() {
     onResize();
 
     renderer = new Renderer(gl);
-    global.scene().setRenderer(renderer);
+    scene().setRenderer(renderer);
 
     // Loads a generic controller meshes.
-    global.scene().inputRenderer.setControllerMesh(
+    scene().inputRenderer.setControllerMesh(
         new Gltf2Node({ url: "./media/gltf/controller/controller.gltf" }),
         "right"
     );
-    global.scene().inputRenderer.setControllerMesh(
+    scene().inputRenderer.setControllerMesh(
         new Gltf2Node({ url: "./media/gltf/controller/controller-left.gltf" }),
         "left"
     );
 
     window.clay = new Clay(gl, gl.canvas);
     window.clay.addEventListenersToCanvas(gl.canvas);
-    
+
 }
 
 function onRequestSession() {
@@ -239,10 +239,10 @@ async function onSessionStarted(session) {
         // remove hand controller while blurred
         if(e.session.visibilityState === 'visible-blurred') {
           for (const box of boxes['left']) {
-            global.scene().removeNode(box);
+            scene().removeNode(box);
           }
           for (const box of boxes['right']) {
-            global.scene().removeNode(box);
+            scene().removeNode(box);
           }
         }
       });
@@ -255,7 +255,7 @@ async function onSessionStarted(session) {
         let refSpace = ev.frame.session.isImmersive
             ? inputController.referenceSpace
             : inlineViewerHelper.referenceSpace;
-        global.scene().handleSelect(ev.inputSource, ev.frame, refSpace);
+        scene().handleSelect(ev.inputSource, ev.frame, refSpace);
     });
 
     initGL();
@@ -294,7 +294,7 @@ function onSessionEnded(event) {
 }
 
 function updateInputSources(session, frame, refSpace) {
-    
+
     for (let inputSource of session.inputSources) {
         let targetRayPose = frame.getPose(inputSource.targetRaySpace, refSpace);
         let offset = 0;
@@ -325,18 +325,18 @@ function updateInputSources(session, frame, refSpace) {
         ]);
         // vec3.transformMat4(cursorPos, cursorPos, inputPose.targetRay.transformMatrix);
 
-        global.scene().inputRenderer.addCursor(cursorPos);
+        scene().inputRenderer.addCursor(cursorPos);
         if(inputSource.hand) {
             window.handtracking = true;
             for (const box of boxes[inputSource.handedness]) {
-                global.scene().removeNode(box);
+                scene().removeNode(box);
             }
-    
+
             let pose = frame.getPose(inputSource.targetRaySpace, refSpace);
             if (pose === undefined) {
                 console.log("no pose");
             }
-    
+
             if (!frame.fillJointRadii(inputSource.hand.values(), radii)) {
                 console.log("no fillJointRadii");
                 continue;
@@ -347,7 +347,7 @@ function updateInputSources(session, frame, refSpace) {
             }
             const thisAvatar = window.avatars[window.playerid];
             for (const box of boxes[inputSource.handedness]) {
-                // global.scene().addNode(box);
+                // scene().addNode(box);
                 let matrix = positions.slice(offset * 16, (offset + 1) * 16);
                 let jointRadius = radii[offset];
                 offset++;
@@ -361,17 +361,17 @@ function updateInputSources(session, frame, refSpace) {
                     scale: jointRadius,
                 });
             }
-                
-            // // Render a special box for each index finger on each hand	
-            // const indexFingerBox = indexFingerBoxes[inputSource.handedness];	
-            // global.scene().addNode(indexFingerBox);	
-            // let joint = inputSource.hand.get('index-finger-tip');	
-            // let jointPose = frame.getJointPose(joint, xrImmersiveRefSpace);	
-            // if (jointPose) {	
+
+            // // Render a special box for each index finger on each hand
+            // const indexFingerBox = indexFingerBoxes[inputSource.handedness];
+            // scene().addNode(indexFingerBox);
+            // let joint = inputSource.hand.get('index-finger-tip');
+            // let jointPose = frame.getJointPose(joint, xrImmersiveRefSpace);
+            // if (jointPose) {
             //     let matrix = jointPose.transform.matrix;
             //     mat4.getTranslation(indexFingerBox.translation, matrix);
             //     mat4.getRotation(indexFingerBox.rotation, matrix);
-            //     indexFingerBox.scale = [0.02, 0.02, 0.02];	
+            //     indexFingerBox.scale = [0.02, 0.02, 0.02];
             // }
         } else if (inputSource.gripSpace) {
             window.handtracking = false;
@@ -379,7 +379,7 @@ function updateInputSources(session, frame, refSpace) {
             if (gripPose) {
                 // If we have a grip pose use it to render a mesh showing the
                 // position of the controller.
-                global.scene().inputRenderer.addController(
+                scene().inputRenderer.addController(
                     gripPose.transform.matrix,
                     inputSource.handedness
                 ); // let controller = this._controllers[handedness]; // so it is updating actually
@@ -435,7 +435,7 @@ function hitTest(inputSource, frame, refSpace) {
         return;
     }
 
-    let hitResult = global.scene().hitTest(targetRayPose.transform);
+    let hitResult = scene().hitTest(targetRayPose.transform);
     if (hitResult) {
         // for (let source of audioSources) {
         //     if (hitResult.node === source.node) {
@@ -521,7 +521,7 @@ function onXRFrame(t, frame) {
 
     keyboardInput.updateKeyState();
 
-    global.scene().startFrame();
+    scene().startFrame();
 
 
     updateInputSources(session, frame, refSpace);
@@ -539,7 +539,7 @@ function onXRFrame(t, frame) {
     // time (one per controller that has the trigger held down).
     // updateAudioSources(frame, refSpace);
 
-    // updateAudioNodes(global.scene());
+    // updateAudioNodes(scene());
 
     updateAvatars();
 
@@ -557,7 +557,7 @@ function onXRFrame(t, frame) {
                     buttons: source.gamepad.buttons,
                     axes: source.gamepad.axes
                 });
-            } 
+            }
         }
     // }
 
@@ -565,13 +565,13 @@ function onXRFrame(t, frame) {
         inlineViewerHelper.update();
     }
 
-    global.scene().drawXRFrame(frame, pose, time);
+    scene().drawXRFrame(frame, pose, time);
 
     // if (pose) {
     //     resonance.setListenerFromMatrix({ elements: pose.transform.matrix });
     // }
 
-    global.scene().endFrame();
+    scene().endFrame();
 }
 
 function updateAvatars() {
@@ -611,7 +611,7 @@ function updateObjects() {
             });
             window.objects[id].node.visible = true;
             window.objects[id].node.selectable = true;
-            global.scene().addNode(window.objects[id].node);
+            scene().addNode(window.objects[id].node);
         }
         window.objects[id].node.matrix = matrix;
     }
