@@ -11,7 +11,10 @@ export let gltfRoot = scene_.addNode(new Node());
 
 export function scene()
 {
-	return scene_ || (scene_ = new Scene());
+	if(!scene_)
+		scene_ = new Scene();
+
+	return scene_;
 }
 
 export function setScene(s)
