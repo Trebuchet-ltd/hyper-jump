@@ -1,5 +1,5 @@
 "use strict";
-import { scenes, reinit } from "/js/handle_scenes.js";
+import { scenes, reinit } from "../../handle_scenes.js";
 import * as cg from "./cg.js";
 import { controllerMatrix } from "./controllerInput.js";
 import { HandsWidget } from "./handsWidget.js";
@@ -325,7 +325,7 @@ let drawMesh = (mesh, materialId, isTriangleMesh, textureSrc, flags) => {
        }
        else {
          // MARK AS LOADING IN-PROGRESS TO AVOID LOADING REPEATEDLY
-         textures[textureSrc] = TEXTURE_LOAD_STATE_UNFINISHED; 
+         textures[textureSrc] = TEXTURE_LOAD_STATE_UNFINISHED;
          let image = new Image();
          image.onload = function(event) {
             try {
@@ -346,8 +346,8 @@ let drawMesh = (mesh, materialId, isTriangleMesh, textureSrc, flags) => {
                   gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
                   gl.texParameteri (gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
                }
-            } catch (e) { 
-               textures[textureSrc + '_error'] = true; 
+            } catch (e) {
+               textures[textureSrc + '_error'] = true;
                if (textures.hasOwnProperty(textureSrc)) {
                   delete textures[textureSrc];
                }
@@ -381,7 +381,7 @@ let drawMesh = (mesh, materialId, isTriangleMesh, textureSrc, flags) => {
    if (this.views.length == 1) {
       setUniform('Matrix4fv', 'uProj', false, this.views[0].projectionMatrix);
       setUniform('Matrix4fv', 'uView', false, this.views[0].viewMatrix);
-      
+
       gl.bufferData(gl.ARRAY_BUFFER, mesh, gl.STATIC_DRAW);
       gl.drawArrays(isTriangleMesh ? gl.TRIANGLES : gl.TRIANGLE_STRIP, 0, mesh.length / VERTEX_SIZE);
    } else {
@@ -644,9 +644,9 @@ materials.white     = { ambient: [.2 ,.2 ,.2 ], diffuse: [.8 ,.8 ,.8 ], specular
 
 // BUILD THE PALETTE OF COLORS
 
-   
+
    for (let n = 0 ; n < 10 ; n++) {
-      let r = colors[n][0], g = colors[n][1], b = colors[n][2];   
+      let r = colors[n][0], g = colors[n][1], b = colors[n][2];
       for (let l = 0 ; l < 2 ; l++) {
          if (l) {
             r = .5 + .5 * r;
@@ -680,7 +680,7 @@ function Blobs() {
    this.isTexture = true;
 
    // CONVERT AN IMPLICIT FUNCTION TO A TRIANGLE MESH
-   
+
    this.implicitSurfaceTriangleMesh = (n, isFaceted, _textureState, _textureSrc) => {
       let V = {}, lo, hi, P = [], T = [], vertexID = {}, i, j, k, S = [0,1,3,7];
 
@@ -693,7 +693,7 @@ function Blobs() {
       textureSrc = _textureSrc;
 
       // COMPUTE THE BOUNDS AROUND ALL BLOBS
-   
+
       this.innerBounds = computeBounds(0,2,4);
       this.outerBounds = computeBounds(1,3,5);
 
@@ -798,24 +798,24 @@ function Blobs() {
       for (let n = 0 ; n < Q.length ; n += 3)
          for (let i = 0 ; i < 3 ; i++)
             P[n + i] = Q[n + i] /= A[n];
-   
+
       // COMPUTE SURFACE NORMALS
-   
+
       let N = new Array(P.length);
       for (let i = 0 ; i < P.length ; i += 3) {
          let normal = computeNormal(P[i],P[i+1],P[i+2]);
          for (let j = 0 ; j < 3 ; j++)
             N[i+j] = normal[j];
       }
-   
+
       // CONSTRUCT AND RETURN THE TRIANGLE MESH
-   
+
       let vertices = [];
       for (let i = 0; i < T.length; i += 3) {
          let a = 3 * T[i    ],
          b = 3 * T[i + 1],
          c = 3 * T[i + 2];
-   
+
          let normalDirection = [ N[a  ] + N[b  ] + N[c  ],
          N[a+1] + N[b+1] + N[c+1],
          N[a+2] + N[b+2] + N[c+2] ];
@@ -827,7 +827,7 @@ function Blobs() {
 
          let addVertex = a => {
             let p  = P.slice(a, a+3),
-                  n  = N.slice(a, a+3), 
+                  n  = N.slice(a, a+3),
                   uv = n[2] > 0 ? [ .5 + .5*p[0], .5 - .5*p[1] ] :
                                   [ n[0]<.5 ? 0 : 1, n[1]>.5 ? 1 : 0 ];
             let v = vertexArray(p, n, [1,0,0], uv, [1,1,1], [1,0,0,0,0,0]);
@@ -835,7 +835,7 @@ function Blobs() {
                vertices.push(v[j]);
             computeWeights(vertices, vertices.length - VERTEX_SIZE + VERTEX_WTS, P[a],P[a+1],P[a+2]);
          }
-         
+
          // FLIP ANY TRIANGLES THAT NEED TO BE FLIPPED
 
          let A = P.slice(a, a+3), B = P.slice(b, b+3), C = P.slice(c, c+3);
@@ -1160,7 +1160,7 @@ function ImplicitSurface() {
          for (let b = 0 ; b < blobMatrices.length ; b++)
             blobInverseMatrices.push(matrix_inverse(blobMatrices[b]));
       }
-   
+
       let rsfData = [], rsiData = [], translateData = [];
       let diffuseData = [], specularData = [];
 
@@ -1619,7 +1619,7 @@ let S = [], vm, vmi, computeQuadric, activeSet, implicitSurface,
       frameCount++;
 
       // SET ALL UNIFORM VARIABLES ON THE GPU
-   
+
       time = (Date.now() - startTime) / 1000;
       setUniform('1f', 'uTime', time);                                  // SET GPU TIME
       let deltaTime = time - prevTime;
@@ -1681,7 +1681,7 @@ let S = [], vm, vmi, computeQuadric, activeSet, implicitSurface,
             draw(cubeMesh, 'black', null, null, [.0025,2,.0025]);
 
       // SET IMPLICIT SURFACE PROPERTIES
-   
+
       implicitSurface.setBlur(blur);
       implicitSurface.setDivs(isFewerDivs ? 15 : activeState() ? 30 : 60);
       implicitSurface.setFaceted(isFaceted);
@@ -1728,7 +1728,7 @@ let S = [], vm, vmi, computeQuadric, activeSet, implicitSurface,
             S[n].jointRotation = blink ? matrix_scale(.01,.01,.01) : matrix_identity();
             rotateAboutJoint(n);
          }
- 
+
       // HANDLE PROCEDURAL WALKING ANIMATION
 
       walkFactor = Math.max(0, Math.min(1, walkFactor + (isWalking ? .06 : -.06)));
@@ -1778,7 +1778,7 @@ let S = [], vm, vmi, computeQuadric, activeSet, implicitSurface,
       }
 
       // DRAW THE MODEL
-   
+
       implicitSurface.beginBlobs();
 
       // SHOW JOINTS IF IN JOINT SHOWING MODE
@@ -1823,7 +1823,7 @@ let S = [], vm, vmi, computeQuadric, activeSet, implicitSurface,
 
          for (let n = 1 ; n < S.length ; n++) {
             let s = S[n];
-            if (s.jointPosition) { 
+            if (s.jointPosition) {
                drawJoint(n);
                if (parent(s) && parent(s).jointPosition)
                   drawLink(matrix_transform(parent(s).M, parent(s).jointPosition),
@@ -1833,7 +1833,7 @@ let S = [], vm, vmi, computeQuadric, activeSet, implicitSurface,
       }
 
       // SPECIFY THE BLOBS FOR THE MODEL
-   
+
       for (let n = 0 ; n < S.length ; n++) {
          M.save();
 
@@ -1969,7 +1969,7 @@ let S = [], vm, vmi, computeQuadric, activeSet, implicitSurface,
          S[n].M = S[n].M_save;
 
       // HANDLE ROTATING THE MODEL
-   
+
       let delta = 2 * deltaTime;
 
       let rotateModel = (rotate, rotateState, matrix_rotate, offset) => {
@@ -2005,7 +2005,7 @@ let S = [], vm, vmi, computeQuadric, activeSet, implicitSurface,
    }
 
    // INSERT A BLOB INTO THE ARRAY OF BLOBS
-   
+
    let insertBlob = (nInsert, s) => {
       for (let n = S.length ; n > nInsert ; n--)
          S[n] = S[n-1];
@@ -2014,7 +2014,7 @@ let S = [], vm, vmi, computeQuadric, activeSet, implicitSurface,
    }
 
    // DELETE A BLOB
-   
+
    let deleteBlob = nDelete => {
       let s = S[nDelete];
 
@@ -2137,7 +2137,7 @@ let S = [], vm, vmi, computeQuadric, activeSet, implicitSurface,
          activeSet(true);
       mnPrev = mn;
    }
-   
+
    let findBlob = (x,y) => {
       let p = matrix_transform(vmi, [0,0,fl,1]);
       let u = matrix_transform(vmi, normalize([x,y,-fl,0]));
@@ -2153,7 +2153,7 @@ let S = [], vm, vmi, computeQuadric, activeSet, implicitSurface,
    }
 
    // COMPUTE THE QUADRIC EQUATION FOR RAY TRACING TO A BLOB
-   
+
    computeQuadric = s => {
       let IM = matrix_inverse(s.M);
       s.Q = matrix_multiply(matrix_transpose(IM),
@@ -2164,7 +2164,7 @@ let S = [], vm, vmi, computeQuadric, activeSet, implicitSurface,
    }
 
    // RAY TRACE TO A BLOB
-   
+
    let raytraceToQuadric = (Q,p,u) => {
       let A = dot(u, matrix_transform(Q, u)),
           B = dot(u, matrix_transform(Q, p)),
@@ -2244,7 +2244,7 @@ let S = [], vm, vmi, computeQuadric, activeSet, implicitSurface,
    let isDraggingFromCenter = false;
 
    let I = n => S[n].symmetry==2 ? n-1 : n;
-   
+
    let transform = (n, dx, dy, dz) => {
       isDraggingFromCenter = isPressed && S[n].symmetry == 0;
       if (isDraggingFromCenter)
@@ -2512,7 +2512,7 @@ let S = [], vm, vmi, computeQuadric, activeSet, implicitSurface,
       xPrev = x;
       yPrev = y;
    }
-   
+
    canvas.onRelease = (x,y) => {
       isPressed = false;
       switch (keyChar) {
@@ -2569,7 +2569,7 @@ let S = [], vm, vmi, computeQuadric, activeSet, implicitSurface,
       xPrev = x;
       yPrev = y;
    }
-   
+
    // RESPOND TO THE KEYBOARD
 
    canvas.onKeyPress = (key, event) => {
@@ -2660,18 +2660,18 @@ let S = [], vm, vmi, computeQuadric, activeSet, implicitSurface,
          if (S.length > 0 && ch >= '0' && ch <= '9') {
             saveForUndo();
             let color = 'color' + (key - 48) + (isLightColor ? 'l' : '');
-   
+
             // SET COLOR OVER BACKGROUND TO COLOR ALL UNCOLORED BLOBS.
-   
+
             if (mn < 0) {
                defaultColor = color;
                for (let n = 0 ; n < S.length ; n++)
                   if (! S[n].isColored)
                      S[n].color = defaultColor;
             }
-   
+
             // SET COLOR OVER A BLOB TO EXPLICITLY COLOR IT.
-   
+
             else {
                let sym = S[ns()].symmetry ? 1 : 0;
                for (let i = 0 ; i <= sym ; i++) {
@@ -2679,11 +2679,11 @@ let S = [], vm, vmi, computeQuadric, activeSet, implicitSurface,
                   S[I(ns())+i].isColored = true;
                }
             }
-   
+
             isLightColor = false;
             return;
          }
-   
+
          switch (key) {
          case 8: // DELETE
             if (isRubber)
@@ -2774,7 +2774,7 @@ let S = [], vm, vmi, computeQuadric, activeSet, implicitSurface,
             }
             break;
          }
-   
+
          if (isControl) {
             switch (ch) {
             case 'Y':
@@ -2789,7 +2789,7 @@ let S = [], vm, vmi, computeQuadric, activeSet, implicitSurface,
             }
             return;
          }
-   
+
          if (isShift) {
             switch (ch) {
             case 'B':
@@ -2835,7 +2835,7 @@ let S = [], vm, vmi, computeQuadric, activeSet, implicitSurface,
             }
             return;
          }
-   
+
          switch (ch) {
          case 'A':
          case 'B':
@@ -2855,7 +2855,7 @@ let S = [], vm, vmi, computeQuadric, activeSet, implicitSurface,
                isCreating = true;
             }
             break;
-   
+
          case 'C':
             if (mn >= 0 && S[mn] && S[mn].M) {
                saveForUndo();
@@ -2958,20 +2958,20 @@ for (let s = 4 ; s < 16 ; s *= 2) {
                         density*7*y,
                         density*7*z));
    density -= 16 * u * u / s;
-}`    
+}`
 ,
 `// LEAFY
 
 f = 7;
 for (let s = 4*f ; s < 64*f ; s *= 2)
-   density += (noise(s*x,s*y,s*z) - .3)  * f/s;` 
+   density += (noise(s*x,s*y,s*z) - .3)  * f/s;`
 ,
 `// ROCK
 
 for (let s = 3 ; s < 100 ; s *= 2)
    density += (noise(s*x,s*y,s*z) - .3) / s;`
-];    
-   
+];
+
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -2989,7 +2989,7 @@ function Node(_form) {
        previousTime,
        rm;
 
-   
+
    this.setControls = () => {
       if (interactMode != wasInteractMode) {
          messages.innerHTML = '<button onclick="interactMode=!interactMode">mode</button>';
