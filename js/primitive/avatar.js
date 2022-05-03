@@ -11,11 +11,11 @@ export function initAvatar(id) {
   let rightController = new Controller("right");
   // setup render nodes for new avatar
   headset.model.name = "headset" + id;
-  global.scene().addNode(headset.model);
+  global.scene().then((scene) => scene.addNode(headset.model));
   leftController.model.name = "LC" + id;
-  global.scene().addNode(leftController.model);
+  global.scene().then((scene) => scene.addNode(leftController.model));
   rightController.model.name = "RC" + id;
-  global.scene().addNode(rightController.model);
+  global.scene().then((scene) => scene.addNode(rightController.model));
   let avatar = new Avatar(headset, id, leftController, rightController);
   window.avatars[id] = avatar;
 }

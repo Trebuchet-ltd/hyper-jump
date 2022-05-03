@@ -84,7 +84,15 @@ if (! window.vr) {
   <script type="module">
     import {reinit} from "./js/handle_scenes.js";
 
-    setInterval(() =>window.load_new_scene && reinit(window.load_new_scene), 1000)
+    setInterval(() =>
+    {
+      if(!window.load_new_scene)
+        return;
+
+      reinit(window.load_new_scene);
+      window.load_new_scene = undefined;
+
+    }, 1000)
 
   </script>
 </body>

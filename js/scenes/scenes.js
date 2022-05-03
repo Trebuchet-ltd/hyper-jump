@@ -3,9 +3,9 @@ import { Gltf2Node } from "../render/nodes/gltf2.js";
 
 export default () => {
 
-   window.gftl2_node = global.scene().addNode(new Gltf2Node({
+   window.gftl2_node = global.scene().then((scene) => scene.addNode(new Gltf2Node({
       url: "./media/gltf/60_fifth_ave/60_fifth_ave.gltf"
-   }));
+   })));
 
    return {
       enableSceneReloading: true,

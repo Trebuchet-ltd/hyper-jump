@@ -202,7 +202,7 @@ function removeScene(){
    sceneNames = [];
    sceneList  = [];
 
-   global.scene().removeNode(window.gftl2_node);
+   global.scene().then((scene) => scene.removeNode(window.gftl2_node));
 
    // global.demoNames().split(",")
    //     .map((name) => clay.vrWidgets.remove('label').info(name.trim()));
@@ -239,7 +239,8 @@ async function loadScene(info) {
 
 const rootPath = "./scenes/";
 async function init(path) {
-   return import(path).then((userInitNamespace) => {
+   const userInitNamespace = await import(path);
+
       let params = null;
       if (!userInitNamespace.default) {
          console.warn("No user initialization procedure specified!");
@@ -267,34 +268,34 @@ async function init(path) {
             }
          }
 
-         if (params.enableSceneReloading != undefined) {
+         if (params.enableSceneReloading !== undefined) {
             enableSceneReloading = params.enableSceneReloading;
          }
       }
 
-   }).catch((err) => {
-      console.error(err);
-   }).finally(() => {
       const demoNames = sceneNames.join(",");
       global.setDemoNames(demoNames);
       addDemoButtons(demoNames);
       scenesInit = true;
-   });
 }
 
 init("./scenes/scenes.js");
 
 
-export async function reinit(path){
-   window.load_new_scene = undefined;
+export function reinit(path){
+   if(!path || !currentDemo)
+      return;
+
+   const repo_name = path.split("vrs/")[1].split("/")[0];
+
+   console.log(`../vrs/${repo_name}/js/global.js`);
 
    console.log("curent Demo", currentDemo)
-   if (currentDemo) {
-      stopDemo(currentDemo);
-   }
+
+   stopDemo(currentDemo);
 
    removeScene();
-   await init(path);
+   init(path);
    // runDemo(currentDemo)
 }
 
@@ -381,10 +382,13 @@ function runDemo(demo) {
 }
 
 function stopDemo(demo) {
-   console.log("in stop demo", demo)
+   console.log("in stop demo", demo, currentDemo)
+   if(demo?.localPath?.split(".").length > 3)
+      return;
+
    demo._isStarted = false;
    demo._isReady = false;
-   if(currentDemo == demo) {
+   if(currentDemo === demo) {
       if (demo.isValid && demo.world.deinit) {
          try {
             // deinitialize any resources that the scene loaded

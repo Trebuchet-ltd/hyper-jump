@@ -1,9 +1,7 @@
 "use strict";
-import { scenes, reinit } from "../../handle_scenes.js";
+import { scenes } from "../../handle_scenes.js";
 import * as cg from "./cg.js";
-import { controllerMatrix } from "./controllerInput.js";
 import { HandsWidget } from "./handsWidget.js";
-import * as keyboardInput from "../../util/input_keyboard.js";
 
 export function Clay(gl, canvas) {
    let clayPgm = function () {

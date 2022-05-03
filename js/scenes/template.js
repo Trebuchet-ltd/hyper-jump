@@ -1,4 +1,4 @@
-import { lcb, rcb, reinit } from "../handle_scenes.js";
+import { lcb, rcb } from "../handle_scenes.js";
 import { buttonState } from "../render/core/controllerInput.js";
 
 export const init = async model => {

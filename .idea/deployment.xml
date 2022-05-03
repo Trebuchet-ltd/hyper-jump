@@ -3,16 +3,24 @@
   <component name="PublishConfigData" autoUpload="Always" serverName="VR" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
     <option name="confirmBeforeUploading" value="false" />
     <serverData>
+      <paths name="Jump">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/hyper-jump/vrs/hyper-ui" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="VR">
         <serverdata>
           <mappings>
-            <mapping deploy="/vr" local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/hyper-jump" local="$PROJECT_DIR$" web="/" />
           </mappings>
           <excludedPaths>
             <excludedPath local="true" path="$PROJECT_DIR$/node_modules" />
             <excludedPath local="true" path="$PROJECT_DIR$/media" />
             <excludedPath local="true" path="$PROJECT_DIR$/repos" />
             <excludedPath local="true" path="$PROJECT_DIR$/.idea" />
+            <excludedPath local="true" path="$PROJECT_DIR$/js/scenes/scenes.js" />
           </excludedPaths>
         </serverdata>
       </paths>

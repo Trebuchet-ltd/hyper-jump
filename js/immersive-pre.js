@@ -38,7 +38,6 @@ window.model = 0;
 import WebXRPolyfill from "./third-party/webxr-polyfill/build/webxr-polyfill.module.js";
 import { updateObject } from "./util/object-sync.js";
 import { updateHandtracking } from "./render/core/handtrackingInput.js";
-import { reinit } from "./handle_scenes.js";
 if (QueryArgs.getBool("usePolyfill", true)) {
     let polyfill = new WebXRPolyfill();
 }
@@ -76,11 +75,11 @@ function initModels() {
     });
     window.models["stereo"].visible = true;
     */
-    // scene().addNode(window.models['stereo']);
+    // scene().then((scene) => scene.addNode(window.models['stereo']));
 }
 
-scene().standingStats(true);
-// scene().addNode(window.models['stereo']);
+scene().then((scene) => scene.standingStats(true));
+// scene().then((scene) => scene.addNode(window.models['stereo']));
 
 function createBoxPrimitive(r, g, b) {
     let boxBuilder = new BoxBuilder();
@@ -102,10 +101,10 @@ function createBoxPrimitive(r, g, b) {
 
   function initHands() {
     for (const box of boxes_left) {
-      scene().removeNode(box);
+      scene().then((scene) => scene.removeNode(box));
     }
     for (const box of boxes_right) {
-      scene().removeNode(box);
+      scene().then((scene) => scene.removeNode(box));
     }
     boxes_left = [];
     boxes_right = [];
@@ -120,10 +119,10 @@ function createBoxPrimitive(r, g, b) {
       }
     }
     if (indexFingerBoxes.left) {
-      scene().removeNode(indexFingerBoxes.left);
+      scene().then((scene) => scene.removeNode(indexFingerBoxes.left));
     }
     if (indexFingerBoxes.right) {
-      scene().removeNode(indexFingerBoxes.right);
+      scene().then((scene) => scene.removeNode(indexFingerBoxes.right));
     }
     indexFingerBoxes.left = addBox(0, 0, 0, leftBoxColor.r, leftBoxColor.g, leftBoxColor.b);
     indexFingerBoxes.right = addBox(0, 0, 0, rightBoxColor.r, rightBoxColor.g, rightBoxColor.b);
@@ -202,7 +201,7 @@ function initGL() {
     onResize();
 
     renderer = new Renderer(gl);
-    scene().setRenderer(renderer);
+    scene().then((scene) => scene.setRenderer(renderer));
 
     // Loads a generic controller meshes.
     scene().inputRenderer.setControllerMesh(
@@ -239,10 +238,10 @@ async function onSessionStarted(session) {
         // remove hand controller while blurred
         if(e.session.visibilityState === 'visible-blurred') {
           for (const box of boxes['left']) {
-            scene().removeNode(box);
+            scene().then((scene) => scene.removeNode(box));
           }
           for (const box of boxes['right']) {
-            scene().removeNode(box);
+            scene().then((scene) => scene.removeNode(box));
           }
         }
       });
@@ -255,7 +254,7 @@ async function onSessionStarted(session) {
         let refSpace = ev.frame.session.isImmersive
             ? inputController.referenceSpace
             : inlineViewerHelper.referenceSpace;
-        scene().handleSelect(ev.inputSource, ev.frame, refSpace);
+        scene().then((scene) => scene.handleSelect(ev.inputSource, ev.frame, refSpace));
     });
 
     initGL();
@@ -325,11 +324,11 @@ function updateInputSources(session, frame, refSpace) {
         ]);
         // vec3.transformMat4(cursorPos, cursorPos, inputPose.targetRay.transformMatrix);
 
-        scene().inputRenderer.addCursor(cursorPos);
+        scene().then((scene) => scene.inputRenderer.addCursor(cursorPos));
         if(inputSource.hand) {
             window.handtracking = true;
             for (const box of boxes[inputSource.handedness]) {
-                scene().removeNode(box);
+                scene().then((scene) => scene.removeNode(box));
             }
 
             let pose = frame.getPose(inputSource.targetRaySpace, refSpace);
@@ -347,7 +346,7 @@ function updateInputSources(session, frame, refSpace) {
             }
             const thisAvatar = window.avatars[window.playerid];
             for (const box of boxes[inputSource.handedness]) {
-                // scene().addNode(box);
+                // scene().then((scene) => scene.addNode(box));
                 let matrix = positions.slice(offset * 16, (offset + 1) * 16);
                 let jointRadius = radii[offset];
                 offset++;
@@ -364,7 +363,7 @@ function updateInputSources(session, frame, refSpace) {
 
             // // Render a special box for each index finger on each hand
             // const indexFingerBox = indexFingerBoxes[inputSource.handedness];
-            // scene().addNode(indexFingerBox);
+            // scene().then((scene) => scene.addNode(indexFingerBox));
             // let joint = inputSource.hand.get('index-finger-tip');
             // let jointPose = frame.getJointPose(joint, xrImmersiveRefSpace);
             // if (jointPose) {
@@ -435,7 +434,7 @@ function hitTest(inputSource, frame, refSpace) {
         return;
     }
 
-    let hitResult = scene().hitTest(targetRayPose.transform);
+    let hitResult = scene().then((scene) => scene.hitTest(targetRayPose.transform));
     if (hitResult) {
         // for (let source of audioSources) {
         //     if (hitResult.node === source.node) {
@@ -521,7 +520,7 @@ function onXRFrame(t, frame) {
 
     keyboardInput.updateKeyState();
 
-    scene().startFrame();
+    scene().then((scene) => scene.startFrame());
 
 
     updateInputSources(session, frame, refSpace);
@@ -565,13 +564,13 @@ function onXRFrame(t, frame) {
         inlineViewerHelper.update();
     }
 
-    scene().drawXRFrame(frame, pose, time);
+    scene().then((scene) => scene.drawXRFrame(frame, pose, time));
 
     // if (pose) {
     //     resonance.setListenerFromMatrix({ elements: pose.transform.matrix });
     // }
 
-    scene().endFrame();
+    scene().then((scene) => scene.endFrame());
 }
 
 function updateAvatars() {
@@ -611,7 +610,7 @@ function updateObjects() {
             });
             window.objects[id].node.visible = true;
             window.objects[id].node.selectable = true;
-            scene().addNode(window.objects[id].node);
+            scene().then((scene) => scene.addNode(window.objects[id].node));
         }
         window.objects[id].node.matrix = matrix;
     }
