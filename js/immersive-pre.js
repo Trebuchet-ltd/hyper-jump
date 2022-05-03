@@ -75,11 +75,9 @@ function initModels() {
     });
     window.models["stereo"].visible = true;
     */
-    // scene().then((scene) => scene.addNode(window.models['stereo']));
 }
 
 scene().then((scene) => scene.standingStats(true));
-// scene().then((scene) => scene.addNode(window.models['stereo']));
 
 function createBoxPrimitive(r, g, b) {
     let boxBuilder = new BoxBuilder();
@@ -99,12 +97,12 @@ function createBoxPrimitive(r, g, b) {
     return boxNode;
   }
 
-  function initHands() {
+  async function initHands() {
     for (const box of boxes_left) {
-      scene().then((scene) => scene.removeNode(box));
+      await scene().then((scene) => scene.removeNode(box));
     }
     for (const box of boxes_right) {
-      scene().then((scene) => scene.removeNode(box));
+      await scene().then((scene) => scene.removeNode(box));
     }
     boxes_left = [];
     boxes_right = [];
@@ -119,10 +117,10 @@ function createBoxPrimitive(r, g, b) {
       }
     }
     if (indexFingerBoxes.left) {
-      scene().then((scene) => scene.removeNode(indexFingerBoxes.left));
+      await scene().then((scene) => scene.removeNode(indexFingerBoxes.left));
     }
     if (indexFingerBoxes.right) {
-      scene().then((scene) => scene.removeNode(indexFingerBoxes.right));
+      await scene().then((scene) => scene.removeNode(indexFingerBoxes.right));
     }
     indexFingerBoxes.left = addBox(0, 0, 0, leftBoxColor.r, leftBoxColor.g, leftBoxColor.b);
     indexFingerBoxes.right = addBox(0, 0, 0, rightBoxColor.r, rightBoxColor.g, rightBoxColor.b);
@@ -184,7 +182,7 @@ window.testws = function () {
     window.wsclient.send("test");
 };
 
-function initGL() {
+async function initGL() {
     if (gl) return;
 
     gl = createWebGLContext({
@@ -201,14 +199,14 @@ function initGL() {
     onResize();
 
     renderer = new Renderer(gl);
-    scene().then((scene) => scene.setRenderer(renderer));
+    await scene().then((scene) => scene.setRenderer(renderer));
 
     // Loads a generic controller meshes.
-    scene().then((scene) => scene.inputRenderer.setControllerMesh(
+    await scene().then((scene) => scene.inputRenderer.setControllerMesh(
         new Gltf2Node({ url: "./media/gltf/controller/controller.gltf" }),
         "right"
     ));
-    scene().then((scene) => scene.inputRenderer.setControllerMesh(
+    await scene().then((scene) => scene.inputRenderer.setControllerMesh(
         new Gltf2Node({ url: "./media/gltf/controller/controller-left.gltf" }),
         "left"
     ));
@@ -234,14 +232,14 @@ function onRequestSession() {
 async function onSessionStarted(session) {
     session.addEventListener("end", onSessionEnded);
 
-    session.addEventListener('visibilitychange', e => {
+    session.addEventListener('visibilitychange',async e => {
         // remove hand controller while blurred
         if(e.session.visibilityState === 'visible-blurred') {
           for (const box of boxes['left']) {
-            scene().then((scene) => scene.removeNode(box));
+            await scene().then((scene) => scene.removeNode(box));
           }
           for (const box of boxes['right']) {
-            scene().then((scene) => scene.removeNode(box));
+            await scene().then((scene) => scene.removeNode(box));
           }
         }
       });
@@ -250,15 +248,15 @@ async function onSessionStarted(session) {
     //Each input source should define a primary action. A primary action (which will sometimes be shortened to "select action") is a platform-specific action which responds to the user manipulating it by delivering, in order, the events selectstart, select, and selectend. Each of these events is of type XRInputSourceEvent.
     session.addEventListener("selectstart", onSelectStart);
     session.addEventListener("selectend", onSelectEnd);
-    session.addEventListener("select", (ev) => {
+    session.addEventListener("select", async (ev) => {
         let refSpace = ev.frame.session.isImmersive
             ? inputController.referenceSpace
             : inlineViewerHelper.referenceSpace;
-        scene().then((scene) => scene.handleSelect(ev.inputSource, ev.frame, refSpace));
+        await scene().then((scene) => scene.handleSelect(ev.inputSource, ev.frame, refSpace));
     });
 
-    initGL();
-    initHands();
+    await initGL();
+    await initHands();
     // scene.inputRenderer.useProfileControllerMeshes(session);
 
     let glLayer = new XRWebGLLayer(session, gl);
@@ -292,7 +290,7 @@ function onSessionEnded(event) {
     }
 }
 
-function updateInputSources(session, frame, refSpace) {
+async function updateInputSources(session, frame, refSpace) {
 
     for (let inputSource of session.inputSources) {
         let targetRayPose = frame.getPose(inputSource.targetRaySpace, refSpace);
@@ -324,11 +322,11 @@ function updateInputSources(session, frame, refSpace) {
         ]);
         // vec3.transformMat4(cursorPos, cursorPos, inputPose.targetRay.transformMatrix);
 
-        scene().then((scene) => scene.inputRenderer.addCursor(cursorPos));
+        await scene().then((scene) => scene.inputRenderer.addCursor(cursorPos));
         if(inputSource.hand) {
             window.handtracking = true;
             for (const box of boxes[inputSource.handedness]) {
-                scene().then((scene) => scene.removeNode(box));
+                await scene().then((scene) => scene.removeNode(box));
             }
 
             let pose = frame.getPose(inputSource.targetRaySpace, refSpace);
@@ -346,7 +344,7 @@ function updateInputSources(session, frame, refSpace) {
             }
             const thisAvatar = window.avatars[window.playerid];
             for (const box of boxes[inputSource.handedness]) {
-                // scene().then((scene) => scene.addNode(box));
+
                 let matrix = positions.slice(offset * 16, (offset + 1) * 16);
                 let jointRadius = radii[offset];
                 offset++;
@@ -363,7 +361,6 @@ function updateInputSources(session, frame, refSpace) {
 
             // // Render a special box for each index finger on each hand
             // const indexFingerBox = indexFingerBoxes[inputSource.handedness];
-            // scene().then((scene) => scene.addNode(indexFingerBox));
             // let joint = inputSource.hand.get('index-finger-tip');
             // let jointPose = frame.getJointPose(joint, xrImmersiveRefSpace);
             // if (jointPose) {
@@ -378,7 +375,7 @@ function updateInputSources(session, frame, refSpace) {
             if (gripPose) {
                 // If we have a grip pose use it to render a mesh showing the
                 // position of the controller.
-                scene().then((scene) => scene.inputRenderer.addController(
+                await scene().then((scene) => scene.inputRenderer.addController(
                     gripPose.transform.matrix,
                     inputSource.handedness
                 )); // let controller = this._controllers[handedness]; // so it is updating actually
@@ -428,13 +425,13 @@ function updateInputSources(session, frame, refSpace) {
     }
 }
 
-function hitTest(inputSource, frame, refSpace) {
+async function hitTest(inputSource, frame, refSpace) {
     let targetRayPose = frame.getPose(inputSource.targetRaySpace, refSpace);
     if (!targetRayPose) {
         return;
     }
 
-    let hitResult = scene().then((scene) => scene.hitTest(targetRayPose.transform));
+    let hitResult = await scene().then((scene) => scene.hitTest(targetRayPose.transform));
     if (hitResult) {
         // for (let source of audioSources) {
         //     if (hitResult.node === source.node) {
@@ -480,11 +477,11 @@ window.testObjSync = function (id) {
     updateObject(id, window.objects[id].node.matrix);
 };
 
-function onSelectStart(ev) {
+async function onSelectStart(ev) {
     let refSpace = ev.frame.session.isImmersive
         ? inputController.referenceSpace
         : inlineViewerHelper.referenceSpace;
-    hitTest(ev.inputSource, ev.frame, refSpace);
+    await hitTest(ev.inputSource, ev.frame, refSpace);
 }
 
 // Remove any references to the input source from the audio sources so
@@ -507,7 +504,7 @@ function onSelectEnd(ev) {
     }
 }
 
-function onXRFrame(t, frame) {
+async function onXRFrame(t, frame) {
     time = t / 1000;
     let session = frame.session;
     let refSpace = session.isImmersive
@@ -520,10 +517,10 @@ function onXRFrame(t, frame) {
 
     keyboardInput.updateKeyState();
 
-    scene().then((scene) => scene.startFrame());
+    await scene().then((scene) => scene.startFrame());
 
 
-    updateInputSources(session, frame, refSpace);
+    await updateInputSources(session, frame, refSpace);
     // ZH: send to websocket server for self avatar sync
     // if (window.playerid != null) window.wsclient.send("avatar", window.playerid);
     // corelink
@@ -542,7 +539,7 @@ function onXRFrame(t, frame) {
 
     updateAvatars();
 
-    updateObjects();
+    await updateObjects();
 
     // ZH: save previous "source.gamepad.buttons" for two controllers,
     // check if changes per frame
@@ -564,13 +561,13 @@ function onXRFrame(t, frame) {
         inlineViewerHelper.update();
     }
 
-    scene().then((scene) => scene.drawXRFrame(frame, pose, time));
+    await scene().then((scene) => scene.drawXRFrame(frame, pose, time));
 
     // if (pose) {
     //     resonance.setListenerFromMatrix({ elements: pose.transform.matrix });
     // }
 
-    scene().then((scene) => scene.endFrame());
+    await scene().then((scene) => scene.endFrame());
 }
 
 function updateAvatars() {
@@ -596,7 +593,7 @@ function updateAvatars() {
     }
 }
 
-function updateObjects() {
+async function updateObjects() {
     // update objects' attributes
     for (let id in window.objects) {
         let type = window.objects[id]["type"];
@@ -610,7 +607,7 @@ function updateObjects() {
             });
             window.objects[id].node.visible = true;
             window.objects[id].node.selectable = true;
-            scene().then((scene) => scene.addNode(window.objects[id].node));
+            await scene().then((scene) => scene.addNode(window.objects[id].node));
         }
         window.objects[id].node.matrix = matrix;
     }
