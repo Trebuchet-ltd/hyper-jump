@@ -9,15 +9,7 @@ console.log(scene_);
 
 export let gltfRoot = scene_.addNode(new Node());
 
-export async function scene() {
-    if (!scene_) {
-        const {Scene} = await import("./render/core/scene.js");
-        const {Node} = await import("./render/core/node.js");
-
-		scene_ = new Scene();
-        gltfRoot = scene_.addNode(new Node());
-    }
-
+export function scene() {
     return scene_;
 }
 
