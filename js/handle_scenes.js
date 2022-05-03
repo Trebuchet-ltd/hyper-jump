@@ -202,7 +202,7 @@ function removeScene(){
    sceneNames = [];
    sceneList  = [];
 
-   global.scene().then((scene) => scene.removeNode(window.gftl2_node));
+   global.scene().removeNode(window.gftl2_node);
 
    // global.demoNames().split(",")
    //     .map((name) => clay.vrWidgets.remove('label').info(name.trim()));
@@ -217,7 +217,7 @@ function removeScene(){
 }
 
 // load scenes asynchronously via dynamic import
-async function loadScene(info) {
+function loadScene(info) {
    let wasValid = (info.isValid == true);
    if (info.isValid == undefined) {
       info.isValid = false;
