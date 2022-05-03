@@ -69,7 +69,7 @@ window.reloadCurrentScene = () => {
 
             currentDemo.isValid = false;
             currentDemo.world.onReload(
-               clay.model, currentDemo.ctx, currentDemo.ctxForever
+                clay.model, currentDemo.ctx, currentDemo.ctxForever
             ).then(() => {
                currentDemo.isValid = prevIsValid;
             }).catch((err) => {
@@ -81,8 +81,8 @@ window.reloadCurrentScene = () => {
             currentDemo.ctx = {};
             currentDemo.isValid = false;
             onReloadDefault(
-               currentDemo.world,
-               clay.model, currentDemo.ctx, currentDemo.ctxForever
+                currentDemo.world,
+                clay.model, currentDemo.ctx, currentDemo.ctxForever
             ).then(() => {
                currentDemo.isValid = prevIsValid;
             }).catch((err) => {
@@ -125,7 +125,7 @@ const addDemoButtons = demoNames => {
       }
       else {
          header.innerHTML += '<button id=\"Speak\" onclick=\"window.' + flag + '=!window.' + flag
-         + ';window.muteSelf()\">' + names[n] + '</button>';
+             + ';window.muteSelf()\">' + names[n] + '</button>';
       }
    }
    lcb = new ControllerBeam(clay.vrWidgets, 'left');
@@ -204,9 +204,6 @@ function removeScene(){
 
    global.scene().removeNode(window.gftl2_node);
 
-   // global.demoNames().split(",")
-   //     .map((name) => clay.vrWidgets.remove('label').info(name.trim()));
-
    window.gftl2_node.clearRenderPrimitives()
 
    global.setDemoNames("");
@@ -237,8 +234,9 @@ async function loadScene(info) {
 
 // initialize the scene system
 
-const rootPath = "./scenes/";
 async function init(path) {
+   const rootPath = `./${path.split("/")[1]}/`;
+
    return import(path).then((userInitNamespace) => {
       let params = null;
       if (!userInitNamespace.default) {
@@ -284,10 +282,9 @@ async function init(path) {
 
 init("./scenes/scenes.js");
 
+window.addEventListener("keypress", (e) => e.key==="b" && reinit("./scenes/scenes.js"))
 
 export async function reinit(path){
-   window.load_new_scene = undefined;
-
    console.log("curent Demo", currentDemo)
    if (currentDemo) {
       stopDemo(currentDemo);
@@ -381,7 +378,6 @@ function runDemo(demo) {
 }
 
 function stopDemo(demo) {
-   console.log("in stop demo", demo)
    demo._isStarted = false;
    demo._isReady = false;
    if(currentDemo == demo) {

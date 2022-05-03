@@ -1,4 +1,4 @@
-import { lcb, rcb, reinit } from "../handle_scenes.js";
+import { lcb, rcb } from "../handle_scenes.js";
 import { buttonState } from "../render/core/controllerInput.js";
 
 export const init = async model => {
@@ -10,6 +10,6 @@ export const init = async model => {
     const triggerR = buttonState.right[0].pressed;
 
     if ((lcb.hitRect(target) || rcb.hitRect(target)) && (triggerR || triggerL))
-        window.load_new_scene = "../vrs/%REPO_NAME%/js/scenes/scenes.js";
+        window.load_new_scene = "./%REPO_NAME%/scenes.js";
   });
 }
