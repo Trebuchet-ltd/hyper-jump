@@ -204,14 +204,14 @@ function initGL() {
     scene().then((scene) => scene.setRenderer(renderer));
 
     // Loads a generic controller meshes.
-    scene().inputRenderer.setControllerMesh(
+    scene().then((scene) => scene.inputRenderer.setControllerMesh(
         new Gltf2Node({ url: "./media/gltf/controller/controller.gltf" }),
         "right"
-    );
-    scene().inputRenderer.setControllerMesh(
+    ));
+    scene().then((scene) => scene.inputRenderer.setControllerMesh(
         new Gltf2Node({ url: "./media/gltf/controller/controller-left.gltf" }),
         "left"
-    );
+    ));
 
     window.clay = new Clay(gl, gl.canvas);
     window.clay.addEventListenersToCanvas(gl.canvas);
@@ -378,10 +378,10 @@ function updateInputSources(session, frame, refSpace) {
             if (gripPose) {
                 // If we have a grip pose use it to render a mesh showing the
                 // position of the controller.
-                scene().inputRenderer.addController(
+                scene().then((scene) => scene.inputRenderer.addController(
                     gripPose.transform.matrix,
                     inputSource.handedness
-                ); // let controller = this._controllers[handedness]; // so it is updating actually
+                )); // let controller = this._controllers[handedness]; // so it is updating actually
                 // ZH: update location
                 // if (window.playerid) {
                     if (inputSource.handedness == "left") {

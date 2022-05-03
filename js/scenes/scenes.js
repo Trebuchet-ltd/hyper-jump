@@ -3,7 +3,7 @@ import { Gltf2Node } from "../render/nodes/gltf2.js";
 
 export default () => {
 
-   window.gftl2_node = global.scene().then((scene) => scene.addNode(new Gltf2Node({
+   global.scene().then((scene) => window.gftl2_node = scene.addNode(new Gltf2Node({
       url: "./media/gltf/60_fifth_ave/60_fifth_ave.gltf"
    })));
 
